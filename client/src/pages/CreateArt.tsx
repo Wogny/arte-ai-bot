@@ -62,8 +62,8 @@ export default function CreateArt() {
 
     generateMutation.mutate({
       prompt,
-      visualStyle: visualStyle as any,
-      contentType: contentType as any,
+      style: visualStyle,
+      contentType: contentType,
       projectId: selectedProject,
     });
   };

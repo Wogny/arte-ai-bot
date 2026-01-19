@@ -149,7 +149,6 @@ export const imageGenerationRouter = router({
           imageUrl,
           imageKey: `generated-images/${nanoid()}.png`,
           contentType: input.contentType,
-          createdAt: new Date(),
         });
 
         return {
