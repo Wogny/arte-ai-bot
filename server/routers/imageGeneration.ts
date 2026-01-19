@@ -35,7 +35,7 @@ async function generateImageWithStableDiffusion(
   guidance_scale: number
 ): Promise<string> {
   const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
-  const engineId = "stable-diffusion-v1-6";
+  const engineId = "stable-diffusion-xl-1024-v1-0";
   const apiUrl = `https://api.stability.ai/v1/generation/${engineId}/text-to-image`;
 
   if (!apiKey || apiKey.trim() === "") {
