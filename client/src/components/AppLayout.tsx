@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,8 @@ import {
   LineChart,
   Lock,
   HelpCircle,
-  Users
+  Users,
+  Loader2
 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
