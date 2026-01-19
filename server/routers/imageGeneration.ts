@@ -8,8 +8,8 @@ import { nanoid } from "nanoid";
 const generateImageInputSchema = z.object({
   prompt: z.string().min(10, "Prompt deve ter no mínimo 10 caracteres"),
   style: z.string().default("realistic"),
-  width: z.number().int().min(256).max(1024).default(512),
-  height: z.number().int().min(256).max(1024).default(512),
+  width: z.number().int().min(256).max(2048).default(1024),
+  height: z.number().int().min(256).max(2048).default(1024),
   steps: z.number().int().min(20).max(100).default(50),
   guidance_scale: z.number().min(1).max(20).default(7.5),
   projectId: z.number().optional(),
@@ -23,6 +23,31 @@ interface StableDiffusionResponse {
     seed: number;
     finishReason: string;
   }>;
+}
+
+/**
+ * Normaliza as dimensões para os formatos aceitos pelo SDXL 1.0
+ * Formatos aceitos: 1024x1024, 1152x896, 1216x832, 1344x768, 1536x640, 640x1536, 768x1344, 832x1216, 896x1152
+ */
+function normalizeDimensions(width: number, height: number): { width: number; height: number } {
+  const ratio = width / height;
+  
+  // Quadrado
+  if (ratio > 0.9 && ratio < 1.1) return { width: 1024, height: 1024 };
+  
+  // Paisagem (Landscape)
+  if (ratio >= 1.1 && ratio < 1.3) return { width: 1152, height: 896 };
+  if (ratio >= 1.3 && ratio < 1.5) return { width: 1216, height: 832 };
+  if (ratio >= 1.5 && ratio < 2.0) return { width: 1344, height: 768 };
+  if (ratio >= 2.0) return { width: 1536, height: 640 };
+  
+  // Retrato (Portrait)
+  if (ratio <= 0.9 && ratio > 0.75) return { width: 896, height: 1152 };
+  if (ratio <= 0.75 && ratio > 0.65) return { width: 832, height: 1216 };
+  if (ratio <= 0.65 && ratio > 0.5) return { width: 768, height: 1344 };
+  if (ratio <= 0.5) return { width: 640, height: 1536 };
+
+  return { width: 1024, height: 1024 };
 }
 
 // Função para chamar Stable Diffusion API Real
@@ -43,7 +68,10 @@ async function generateImageWithStableDiffusion(
     throw new Error("API Key da Stability AI não configurada.");
   }
 
-  console.log(`[Image Generation] Iniciando geração real com API Key: ${apiKey.substring(0, 5)}...`);
+  // Normalizar dimensões para SDXL
+  const { width: finalWidth, height: finalHeight } = normalizeDimensions(width, height);
+  
+  console.log(`[Image Generation] Iniciando geração SDXL (${finalWidth}x${finalHeight}) com API Key: ${apiKey.substring(0, 5)}...`);
 
   const stylePrompts: Record<string, string> = {
     minimalista: "minimalist style, clean, simple, professional",
@@ -72,8 +100,8 @@ async function generateImageWithStableDiffusion(
           },
         ],
         cfg_scale: guidance_scale,
-        height,
-        width,
+        height: finalHeight,
+        width: finalWidth,
         steps,
         samples: 1,
       }),
