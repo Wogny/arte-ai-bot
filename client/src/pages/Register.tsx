@@ -51,7 +51,7 @@ export default function Register() {
         name,
       });
       if (result.success) {
-        setLocation('/dashboard');
+        setLocation('/login');
       } else {
         setError(result.message || 'Falha ao criar conta');
       }
