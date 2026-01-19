@@ -79,44 +79,29 @@ export default function AppLayout({ children }: AppLayoutProps) {
       });
   }, []);
 
+  // Se estiver carregando, mostra o loader
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Carregando...</p>
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="text-muted-foreground animate-pulse">Verificando sessão...</p>
         </div>
       </div>
     );
   }
 
+  // Se não estiver autenticado, redireciona para o login em vez de mostrar tela de login sobreposta
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30">
-        <div className="text-center max-w-md px-4">
-          <div className="mb-6">
-            <Sparkles className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h1 className="text-3xl font-bold mb-2">MKT Gerenciador</h1>
-            <p className="text-muted-foreground">
-              Crie conteúdo visual incrível com inteligência artificial
-            </p>
-          </div>
-          <div className="space-y-4">
-            <Button size="lg" className="w-full" asChild>
-              <Link href="/login">Fazer Login</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="w-full" asChild>
-              <Link href="/register">Criar Conta</Link>
-            </Button>
-            {devLoginAvailable && (
-              <Button size="sm" variant="ghost" className="w-full" asChild>
-                <a href="/api/dev/login">Entrar (Modo Desenvolvimento)</a>
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+    // Se estiver em uma rota protegida, redireciona para o login
+    const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
+    if (!publicPages.includes(location)) {
+      window.location.href = "/login";
+      return null;
+    }
+    
+    // Se for uma página pública mas que usa AppLayout (raro), mostra o conteúdo original
+    return <>{children}</>;
   }
 
   return (

@@ -132,22 +132,34 @@ function App() {
     <ThemeProvider defaultTheme="dark">
       <TooltipProvider>
         <ErrorBoundary>
-          {isPublicPage ? (
-            <Suspense fallback={<PageLoader />}>
-              <Switch>
-                <Route path="/" component={Landing} />
-                <Route path="/pricing" component={Pricing} />
-                <Route path="/landing" component={Landing} />
-                <Route path="/login" component={Login} />
-                <Route path="/register" component={Register} />
-                <Route path="/forgot-password" component={ForgotPassword} />
-              </Switch>
-            </Suspense>
-          ) : (
-            <AppLayout>
-              <Router />
-            </AppLayout>
-          )}
+          <Switch>
+            {/* Páginas Públicas que NÃO usam AppLayout */}
+            <Route path="/">
+              <Suspense fallback={<PageLoader />}><Landing /></Suspense>
+            </Route>
+            <Route path="/pricing">
+              <Suspense fallback={<PageLoader />}><Pricing /></Suspense>
+            </Route>
+            <Route path="/landing">
+              <Suspense fallback={<PageLoader />}><Landing /></Suspense>
+            </Route>
+            <Route path="/login">
+              <Suspense fallback={<PageLoader />}><Login /></Suspense>
+            </Route>
+            <Route path="/register">
+              <Suspense fallback={<PageLoader />}><Register /></Suspense>
+            </Route>
+            <Route path="/forgot-password">
+              <Suspense fallback={<PageLoader />}><ForgotPassword /></Suspense>
+            </Route>
+
+            {/* Todas as outras rotas usam AppLayout */}
+            <Route>
+              <AppLayout>
+                <Router />
+              </AppLayout>
+            </Route>
+          </Switch>
         </ErrorBoundary>
       </TooltipProvider>
     </ThemeProvider>
