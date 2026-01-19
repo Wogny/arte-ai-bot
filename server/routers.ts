@@ -32,9 +32,6 @@ import { socialPublishingRouter } from "./routers/socialPublishing.js";
 import { notificationsRouter } from "./routers/notifications.js";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc.js";
 import { z } from "zod";
-import { generateImage } from "./_core/imageGeneration.js";
-import { storagePut } from "./storage.js";
-import { nanoid } from "nanoid";
 import * as db from "./db.js";
 
 export const appRouter = router({
@@ -69,6 +66,16 @@ export const appRouter = router({
   notifications: notificationsRouter,
   
   auth: authRouter,
+
+  // Alias para compatibilidade com o frontend
+  images: imageGenerationRouter,
+  
+  // Rota de campanhas (redireciona para agendamento/analytics)
+  campaigns: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getUserScheduledPosts(ctx.user.id);
+    }),
+  }),
 
   dashboard: router({
     stats: protectedProcedure.query(async ({ ctx }) => {
@@ -119,103 +126,6 @@ export const appRouter = router({
         await db.deleteProject(input.projectId, ctx.user.id);
         return { success: true };
       }),
-  }),
-
-  images: router({
-    generate: protectedProcedure
-      .input(z.object({
-        prompt: z.string().min(1),
-        visualStyle: z.enum(["minimalista", "colorido", "corporativo", "artistico", "moderno"]),
-        contentType: z.enum(["post", "story", "banner", "anuncio"]),
-        projectId: z.number().optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        console.log("[Images] Gerando imagem para prompt:", input.prompt);
-        
-        let imageUrl: string;
-        const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
-
-        if (!apiKey) {
-          console.log("[Images] Modo DEMO: Usando Unsplash");
-          // Usar Unsplash Source para imagens aleatórias bonitas
-          // Formato: https://images.unsplash.com/photo-<id>?q=80&w=800
-          // Usando uma imagem genérica de alta qualidade como placeholder
-          imageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
-        } else {
-          const enhancedPrompt = `Create a ${input.visualStyle} style ${input.contentType} for social media. ${input.prompt}`;
-          const result = await generateImage({
-            prompt: enhancedPrompt,
-          });
-
-          if (!result.url) {
-            throw new Error("Failed to generate image");
-          }
-          imageUrl = result.url;
-        }
-
-        const fileKey = `${ctx.user.id}/images/${nanoid()}.png`;
-        
-        // Se for URL externa (Unsplash), salvamos a URL diretamente
-        // Se for da API real, poderíamos baixar e salvar no S3, mas para o demo vamos usar a URL
-        
-        const savedImage = await db.saveGeneratedImage({
-          userId: ctx.user.id,
-          projectId: input.projectId ?? null,
-          prompt: input.prompt,
-          visualStyle: input.visualStyle,
-          contentType: input.contentType,
-          imageUrl: imageUrl,
-          imageKey: fileKey,
-        });
-
-        return savedImage;
-      }),
-
-    list: protectedProcedure
-      .input(z.object({ projectId: z.number().optional() }))
-      .query(async ({ ctx, input }) => {
-        return await db.getUserImages(ctx.user.id, input.projectId);
-      }),
-
-    getById: protectedProcedure
-      .input(z.object({ imageId: z.number() }))
-      .query(async ({ ctx, input }) => {
-        return await db.getImageById(input.imageId, ctx.user.id);
-      }),
-
-    delete: protectedProcedure
-      .input(z.object({ imageId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        await db.deleteImage(input.imageId, ctx.user.id);
-        return { success: true };
-      }),
-  }),
-
-  meta: router({
-    saveCredentials: protectedProcedure
-      .input(z.object({
-        appId: z.string().min(1),
-        appSecret: z.string().min(1),
-        accessToken: z.string().min(1),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        return await db.saveMetaCredentials({
-          userId: ctx.user.id,
-          ...input,
-        });
-      }),
-
-    getCredentials: protectedProcedure.query(async ({ ctx }) => {
-      const credentials = await db.getActiveMetaCredentials(ctx.user.id);
-      if (!credentials) return null;
-      
-      return {
-        id: credentials.id,
-        appId: credentials.appId,
-        hasCredentials: true,
-        createdAt: credentials.createdAt,
-      };
-    }),
   }),
 
   scheduling: router({
