@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { getDb } from '../db.ts';
+import { getDb } from '../db';
 import { subscriptions, payments } from '../../drizzle/schema';
 import { eq } from 'drizzle-orm';
 
