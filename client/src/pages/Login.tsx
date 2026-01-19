@@ -22,12 +22,15 @@ export default function Login() {
 
     try {
       const result = await loginMutation.mutateAsync({ email, password });
+      console.log("[Login] Resultado do login:", result);
       if (result.success) {
         // Salva uma flag temporária para o AppLayout saber que um login acabou de ocorrer
         localStorage.setItem("manus-runtime-user-info", JSON.stringify(result.user));
+        console.log("[Login] Cache de usuário salvo, invalidando query 'me'...");
         // Invalida a query 'me' para garantir que o AppLayout reconheça o novo usuário
         await utils.auth.me.invalidate();
         // Redireciona para o dashboard limpando o histórico de login
+        console.log("[Login] Redirecionando para /dashboard...");
         window.location.replace('/dashboard');
       } else {
         setError(result.message || 'Falha ao fazer login');
