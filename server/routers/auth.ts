@@ -39,8 +39,8 @@ export const authRouter = router({
   logout: publicProcedure.mutation(({ ctx }) => {
     const cookieOptions = {
       maxAge: -1,
-      secure: true,
-      sameSite: "none" as const,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax" as const,
       httpOnly: true,
       path: "/",
     };
@@ -139,8 +139,8 @@ export const authRouter = router({
       // Definir cookie
       const cookieOptions = {
         maxAge: ONE_YEAR_MS,
-        secure: true,
-        sameSite: "none" as const,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax" as const,
         httpOnly: true,
         path: "/",
       };

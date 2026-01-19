@@ -101,15 +101,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
               Crie conteúdo visual incrível com inteligência artificial
             </p>
           </div>
-          {devLoginAvailable ? (
+          <div className="space-y-4">
             <Button size="lg" className="w-full" asChild>
-              <a href="/api/dev/login">Entrar (Modo Desenvolvimento)</a>
+              <Link href="/login">Fazer Login</Link>
             </Button>
-          ) : (
-            <Button size="lg" className="w-full" asChild>
-              <a href={getLoginUrl()}>Fazer Login</a>
+            <Button size="lg" variant="outline" className="w-full" asChild>
+              <Link href="/register">Criar Conta</Link>
             </Button>
-          )}
+            {devLoginAvailable && (
+              <Button size="sm" variant="ghost" className="w-full" asChild>
+                <a href="/api/dev/login">Entrar (Modo Desenvolvimento)</a>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     );

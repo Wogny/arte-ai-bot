@@ -60,17 +60,20 @@ export function useAuth(options?: UseAuthOptions) {
     logoutMutation.isPending,
   ]);
 
-  // Redirecionamento removido para evitar loops infinitos no ambiente de produção
-  // A proteção de rotas deve ser tratada nos componentes de página ou no AppLayout
-  /*
+  // Redirecionamento restaurado com proteção contra loops
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
     if (meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
+    
+    // Lista de páginas públicas onde o redirecionamento não deve ocorrer
+    const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
+    if (publicPages.includes(window.location.pathname)) return;
+
     if (window.location.pathname === redirectPath) return;
 
-    window.location.href = redirectPath
+    window.location.href = redirectPath;
   }, [
     redirectOnUnauthenticated,
     redirectPath,
@@ -78,7 +81,6 @@ export function useAuth(options?: UseAuthOptions) {
     meQuery.isLoading,
     state.user,
   ]);
-  */
 
   return {
     ...state,

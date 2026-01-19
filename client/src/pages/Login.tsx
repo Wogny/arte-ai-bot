@@ -25,8 +25,8 @@ export default function Login() {
       if (result.success) {
         // Invalida a query 'me' para garantir que o AppLayout reconheça o novo usuário
         await utils.auth.me.invalidate();
-        // Redireciona para o dashboard
-        window.location.href = '/dashboard';
+        // Redireciona para o dashboard limpando o histórico de login
+        window.location.replace('/dashboard');
       } else {
         setError(result.message || 'Falha ao fazer login');
       }
