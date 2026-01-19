@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db";
-import { storagePut } from "../storage";
+import * as db from "../db.js";
+import { storagePut } from "../storage.js";
 import { nanoid } from "nanoid";
 
 // Validação de entrada

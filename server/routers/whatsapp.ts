@@ -1,9 +1,9 @@
 import { z } from "zod";
 import axios from "axios";
-import { router, protectedProcedure } from "../_core/trpc";
-import { logActivity } from "../_core/audit";
-import { whatsappService } from "../whatsapp/service";
-import * as whatsappDb from "../whatsapp/db";
+import { router, protectedProcedure } from "../_core/trpc.js";
+import { logActivity } from "../_core/audit.js";
+import { whatsappService } from "../whatsapp/service.js";
+import * as whatsappDb from "../whatsapp/db.js";
 
 const WHATSAPP_API_URL = "https://graph.facebook.com/v18.0";
 

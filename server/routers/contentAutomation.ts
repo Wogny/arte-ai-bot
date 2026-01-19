@@ -1,16 +1,16 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import { runInBackground } from "../_core/queue";
-import { notifyOwner } from "../_core/notification";
+import { runInBackground } from "../_core/queue.js";
+import { notifyOwner } from "../_core/notification.js";
 import {
   adaptContentForMultiplePlatforms,
   adaptContentForPlatform,
   generateContentRecommendations,
   PLATFORM_CONFIGS,
   PlatformType,
-} from "../contentAutomation";
-import { getDb } from "../db";
+} from "../contentAutomation.js";
+import { getDb } from "../db.js";
 import { generatedImages } from '../../drizzle/schema.js';
 import { eq } from "drizzle-orm";
 

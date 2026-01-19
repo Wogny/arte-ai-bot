@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import { getDb } from "../db";
+import { getDb } from "../db.js";
 import { users } from '../../drizzle/schema.js';
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";

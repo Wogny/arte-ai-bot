@@ -2,7 +2,7 @@
  * Serviço de integração com Instagram Graph API
  */
 
-import { apiConfigs } from './apis-config';
+import { apiConfigs } from './apis-config.js';
 
 interface PublishPostParams {
   caption: string;

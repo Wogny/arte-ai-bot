@@ -5,10 +5,10 @@
 
 import { Request, Response, Router } from "express";
 import { eq } from "drizzle-orm";
-import { getDb } from "../db";
+import { getDb } from "../db.js";
 import { whatsappNotificationSettings } from '../../drizzle/schema.js';
-import * as whatsappDb from "./db";
-import { whatsappService } from "./service";
+import * as whatsappDb from "./db.js";
+import { whatsappService } from "./service.js";
 
 const router = Router();
 

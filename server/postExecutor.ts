@@ -1,12 +1,12 @@
 import { CronJob } from "cron";
-import { getDb } from "./db";
+import { getDb } from "./db.js";
 import { scheduledPosts, platformCredentials, generatedImages } from '../drizzle/schema.js';
 import { eq, and, lte } from "drizzle-orm";
-import { notifyOwner } from "./_core/notification";
-import { callPlatformApi } from "./_core/apiResilience";
-import { FacebookInstagramIntegration, TikTokIntegration, WhatsAppIntegration } from "./platformIntegrations";
-import { ENV } from "./_core/env";
-import { getFriendlyErrorMessage } from "./_core/apiErrors";
+import { notifyOwner } from "./_core/notification.js";
+import { callPlatformApi } from "./_core/apiResilience.js";
+import { FacebookInstagramIntegration, TikTokIntegration, WhatsAppIntegration } from "./platformIntegrations.js";
+import { ENV } from "./_core/env.js";
+import { getFriendlyErrorMessage } from "./_core/apiErrors.js";
 
 interface ExecutionLog {
   postId: number;

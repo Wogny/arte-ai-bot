@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db";
+import * as db from "../db.js";
 
 // Validação de entrada
 const publishPostInputSchema = z.object({

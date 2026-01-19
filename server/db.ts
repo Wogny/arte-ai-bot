@@ -65,7 +65,7 @@ import {
   subscriptions,
   usageTracking,
 } from '../drizzle/schema.js';
-import { ENV } from './_core/env';
+import { ENV } from './_core/env.js';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 

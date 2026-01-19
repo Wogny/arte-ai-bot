@@ -1,6 +1,6 @@
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { z } from "zod";
-import { getDb } from "../db";
+import { getDb } from "../db.js";
 import { subscriptions, payments, subscriptionPlans } from '../../drizzle/schema.js';
 import { eq, desc, and } from "drizzle-orm";
 

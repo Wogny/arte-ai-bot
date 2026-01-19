@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import { ENV } from './env';
+import { ENV } from './env.js';
 
 const ALGORITHM = 'aes-256-cbc';
 const IV_LENGTH = 16;

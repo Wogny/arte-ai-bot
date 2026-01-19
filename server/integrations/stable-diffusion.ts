@@ -2,7 +2,7 @@
  * Serviço de integração com Stable Diffusion via Replicate
  */
 
-import { apiConfigs } from './apis-config';
+import { apiConfigs } from './apis-config.js';
 
 interface GenerateImageParams {
   prompt: string;

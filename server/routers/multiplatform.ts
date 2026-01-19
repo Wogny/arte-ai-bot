@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { getDb } from "../db.js";
 import { multiPlatformPosts } from '../../drizzle/schema.js';
 import { eq, and, lte } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { QuotaManager } from "../_core/quotaManager";
-import { whatsappService } from "../whatsapp/service";
-import * as whatsappDb from "../whatsapp/db";
+import { QuotaManager } from "../_core/quotaManager.js";
+import { whatsappService } from "../whatsapp/service.js";
+import * as whatsappDb from "../whatsapp/db.js";
 
 export const multiplatformRouter = router({
   create: protectedProcedure

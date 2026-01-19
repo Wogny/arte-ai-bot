@@ -1,12 +1,12 @@
 import { z } from "zod";
-import { workspaceProcedure } from "../_core/trpc";
-import { router } from "../_core/trpc";
-import { getDb } from "../db";
+import { workspaceProcedure } from "../_core/trpc.js";
+import { router } from "../_core/trpc.js";
+import { getDb } from "../db.js";
 import { scheduledPosts, postComments, postVersions, users } from '../../drizzle/schema.js';
 import { eq, and, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { logActivity } from "../_core/audit";
-import { notifyOwner } from "../_core/notification";
+import { logActivity } from "../_core/audit.js";
+import { notifyOwner } from "../_core/notification.js";
 
 export const collaborationRouter = router({
   /**

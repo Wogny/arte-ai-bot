@@ -1,8 +1,8 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { getDb } from "../db";
+import { getDb } from "../db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
-import { decrypt, encrypt } from "./security";
+import { decrypt, encrypt } from "./security.js";
 
 /**
  * Configuração para tentativas de re-execução (Retry)

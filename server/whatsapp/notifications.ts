@@ -5,8 +5,8 @@
  * enviando alertas automáticos para os contatos configurados.
  */
 
-import * as whatsappDb from "./db";
-import { whatsappService } from "./service";
+import * as whatsappDb from "./db.js";
+import { whatsappService } from "./service.js";
 
 // Tipos de notificação suportados
 export type NotificationType = 

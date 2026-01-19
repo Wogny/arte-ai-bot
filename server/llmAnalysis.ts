@@ -1,4 +1,4 @@
-import { invokeLLM } from "./_core/llm";
+import { invokeLLM } from "./_core/llm.js";
 import type { Campaign } from '../drizzle/schema.js';
 
 export interface AnalysisResult {

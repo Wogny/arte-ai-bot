@@ -1,6 +1,6 @@
 import { CronJob } from "cron";
-import * as db from "../db";
-import { notifyOwner } from "../_core/notification";
+import * as db from "../db.js";
+import { notifyOwner } from "../_core/notification.js";
 
 // Status de publicação
 type PublishStatus = "success" | "failed" | "pending";

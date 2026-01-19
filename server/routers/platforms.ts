@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { encrypt, decrypt } from "../_core/security";
-import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { encrypt, decrypt } from "../_core/security.js";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { getDb } from "../db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { QuotaManager } from "../_core/quotaManager";
+import { QuotaManager } from "../_core/quotaManager.js";
 
 export const platformsRouter = router({
   addCredentials: protectedProcedure

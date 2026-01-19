@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { getDb } from "../db.js";
 import { multiPlatformPosts, campaigns, platformCredentials } from '../../drizzle/schema.js';
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { getMetaGraphService } from "../metaGraphAPI";
+import { getMetaGraphService } from "../metaGraphAPI.js";
 
 export const realTimeAnalyticsRouter = router({
   /**

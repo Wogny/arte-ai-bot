@@ -1,4 +1,4 @@
-import { invokeLLM } from "./_core/llm";
+import { invokeLLM } from "./_core/llm.js";
 import sharp from "sharp";
 
 /**

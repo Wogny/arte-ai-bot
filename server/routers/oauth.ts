@@ -1,11 +1,11 @@
-import { protectedProcedure, router } from "../_core/trpc";
+import { protectedProcedure, router } from "../_core/trpc.js";
 import { z } from "zod";
 import {
   TikTokIntegration,
   FacebookInstagramIntegration,
   WhatsAppIntegration,
-} from "../platformIntegrations";
-import { getDb } from "../db";
+} from "../platformIntegrations.js";
+import { getDb } from "../db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 

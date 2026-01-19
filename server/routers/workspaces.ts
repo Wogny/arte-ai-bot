@@ -1,11 +1,11 @@
 import { z } from "zod";
-import { protectedProcedure, router } from "../_core/trpc";
-import { getDb } from "../db";
+import { protectedProcedure, router } from "../_core/trpc.js";
+import { getDb } from "../db.js";
 import { workspaces, workspaceMembers, workspaceInvites, users } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";
-import { logActivity } from "../_core/audit";
+import { logActivity } from "../_core/audit.js";
 
 export const workspacesRouter = router({
   /**

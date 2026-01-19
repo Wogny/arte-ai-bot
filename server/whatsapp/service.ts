@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as whatsappDb from "./db";
+import * as whatsappDb from "./db.js";
 
 const WHATSAPP_API_URL = "https://graph.facebook.com/v18.0";
 

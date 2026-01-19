@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import * as db from "./db";
+import * as db from "./db.js";
 import { platformCredentials } from '../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 

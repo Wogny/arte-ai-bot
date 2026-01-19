@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { appRouter } from "./routers";
-import type { TrpcContext } from "./_core/context";
+import { appRouter } from "./routers.js";
+import type { TrpcContext } from "./_core/context.js";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 

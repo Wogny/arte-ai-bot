@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { ENV } from './env';
+import { ENV } from './env.js';
 
 const execPromise = promisify(exec);
 

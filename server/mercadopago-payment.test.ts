@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getDb } from './db';
+import { getDb } from './db.js';
 import { subscriptions, payments } from '../drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 

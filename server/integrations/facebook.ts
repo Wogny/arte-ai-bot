@@ -2,7 +2,7 @@
  * Serviço de integração com Facebook Graph API
  */
 
-import { apiConfigs } from './apis-config';
+import { apiConfigs } from './apis-config.js';
 
 interface PublishPostParams {
   message: string;

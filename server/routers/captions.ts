@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { router, protectedProcedure } from "../_core/trpc";
-import { invokeLLM } from "../_core/llm";
-import * as db from "../db";
+import { router, protectedProcedure } from "../_core/trpc.js";
+import { invokeLLM } from "../_core/llm.js";
+import * as db from "../db.js";
 
 // Tipos de tom para legendas
 const toneOptions = ["formal", "casual", "divertido", "inspirador", "profissional", "urgente"] as const;

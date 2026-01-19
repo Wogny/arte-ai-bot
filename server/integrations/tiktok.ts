@@ -2,7 +2,7 @@
  * Serviço de integração com TikTok API
  */
 
-import { apiConfigs } from './apis-config';
+import { apiConfigs } from './apis-config.js';
 
 interface PublishPostParams {
   caption: string;

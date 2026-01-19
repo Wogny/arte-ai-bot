@@ -1,5 +1,5 @@
-import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
-import { postExecutor } from "../postExecutor";
+import { protectedProcedure, publicProcedure, router } from "../_core/trpc.js";
+import { postExecutor } from "../postExecutor.js";
 import { z } from "zod";
 
 export const executionRouter = router({

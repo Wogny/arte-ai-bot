@@ -1,4 +1,4 @@
-import { router, protectedProcedure } from '../_core/trpc';
+import { router, protectedProcedure } from '../_core/trpc.js';
 import { z } from 'zod';
 import { subscriptions } from '../../drizzle/schema.js';
 import { eq } from 'drizzle-orm';
