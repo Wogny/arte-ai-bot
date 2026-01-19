@@ -96,12 +96,26 @@ export default function AppLayout({ children }: AppLayoutProps) {
   if (!isAuthenticated) {
     // Se estiver em uma rota protegida, redireciona para o login
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
+    
+    // Adicionamos um pequeno delay mental ou verificação extra para evitar redirecionamentos falsos
     if (!publicPages.includes(location)) {
-      window.location.href = "/login";
-      return null;
+      // Verificamos se realmente não há dados no localStorage como fallback rápido
+      const cachedUser = localStorage.getItem("manus-runtime-user-info");
+      if (!cachedUser || cachedUser === "null") {
+        window.location.href = "/login";
+        return null;
+      }
+      // Se houver cache, mostramos o loader enquanto o 'me' valida
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <p className="text-muted-foreground animate-pulse">Sincronizando sessão...</p>
+          </div>
+        </div>
+      );
     }
     
-    // Se for uma página pública mas que usa AppLayout (raro), mostra o conteúdo original
     return <>{children}</>;
   }
 

@@ -60,14 +60,15 @@ export function useAuth(options?: UseAuthOptions) {
     logoutMutation.isPending,
   ]);
 
-  // Redirecionamento restaurado com proteção contra loops
+  // Redirecionamento desativado no hook para evitar conflitos com o AppLayout
+  // A proteção de rotas agora é centralizada no AppLayout.tsx
+  /*
   useEffect(() => {
     if (!redirectOnUnauthenticated) return;
     if (meQuery.isLoading || logoutMutation.isPending) return;
     if (state.user) return;
     if (typeof window === "undefined") return;
     
-    // Lista de páginas públicas onde o redirecionamento não deve ocorrer
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
     if (publicPages.includes(window.location.pathname)) return;
 
@@ -81,6 +82,7 @@ export function useAuth(options?: UseAuthOptions) {
     meQuery.isLoading,
     state.user,
   ]);
+  */
 
   return {
     ...state,

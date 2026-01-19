@@ -23,6 +23,8 @@ export default function Login() {
     try {
       const result = await loginMutation.mutateAsync({ email, password });
       if (result.success) {
+        // Salva uma flag temporária para o AppLayout saber que um login acabou de ocorrer
+        localStorage.setItem("manus-runtime-user-info", JSON.stringify(result.user));
         // Invalida a query 'me' para garantir que o AppLayout reconheça o novo usuário
         await utils.auth.me.invalidate();
         // Redireciona para o dashboard limpando o histórico de login
