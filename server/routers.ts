@@ -1,4 +1,4 @@
-import { COOKIE_NAME } from "@shared/const";
+import { COOKIE_NAME } from "../shared/const.js";
 import { tagsRouter } from "./routers/tags.js";
 import { mediaRouter } from "./routers/media.js";
 import { getSessionCookieOptions } from "./_core/cookies.js";

@@ -1,8 +1,8 @@
-import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from '@shared/const';
+import { NOT_ADMIN_ERR_MSG, UNAUTHED_ERR_MSG } from "../../shared/const.js";
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
-import { getDb } from "../db";
+import { getDb } from "../db.js";
 import { workspaceMembers } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
 
