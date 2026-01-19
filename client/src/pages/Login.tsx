@@ -13,6 +13,8 @@ export default function Login() {
 
   const loginMutation = trpc.auth.loginWithEmail.useMutation();
 
+  const utils = trpc.useUtils();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -21,7 +23,10 @@ export default function Login() {
     try {
       const result = await loginMutation.mutateAsync({ email, password });
       if (result.success) {
-        setLocation('/dashboard');
+        // Invalida a query 'me' para garantir que o AppLayout reconheça o novo usuário
+        await utils.auth.me.invalidate();
+        // Redireciona para o dashboard
+        window.location.href = '/dashboard';
       } else {
         setError(result.message || 'Falha ao fazer login');
       }

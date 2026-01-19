@@ -2,7 +2,8 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db.js";
-import { COOKIE_NAME } from "../../shared/const.js";
+import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
+import { sdk } from "../_core/sdk.js";
 import crypto from "crypto";
 
 // Validação de email
@@ -129,6 +130,21 @@ export const authRouter = router({
           message: "Email não verificado. Verifique seu email para continuar.",
         });
       }
+
+      // Gerar token de sessão
+      const sessionToken = await sdk.createSessionToken(user.openId, {
+        name: user.name || "",
+      });
+
+      // Definir cookie
+      const cookieOptions = {
+        maxAge: ONE_YEAR_MS,
+        secure: true,
+        sameSite: "none" as const,
+        httpOnly: true,
+        path: "/",
+      };
+      ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
 
       return {
         success: true,

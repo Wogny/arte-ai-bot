@@ -67,9 +67,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
   // Verifica se login de desenvolvimento está disponível
   useEffect(() => {
     fetch("/api/dev/status")
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
       .then(data => {
-        setDevLoginAvailable(data.devLoginAvailable);
+        setDevLoginAvailable(data?.devLoginAvailable || false);
       })
       .catch(() => {
         setDevLoginAvailable(false);
