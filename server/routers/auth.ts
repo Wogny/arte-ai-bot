@@ -124,13 +124,14 @@ export const authRouter = router({
         });
       }
 
-      // Verificar se email foi verificado
-      if (!user.emailVerified) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Email não verificado. Verifique seu email para continuar.",
-        });
-      }
+      // TODO: Implementar sistema de verificação de email
+      // Por enquanto, permitir login sem verificação para MVP
+      // if (!user.emailVerified) {
+      //   throw new TRPCError({
+      //     code: "FORBIDDEN",
+      //     message: "Email não verificado. Verifique seu email para continuar.",
+      //   });
+      // }
 
       // Gerar token de sessão
       const sessionToken = await sdk.createSessionToken(user.openId, {
