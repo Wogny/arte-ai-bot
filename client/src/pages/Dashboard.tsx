@@ -175,33 +175,38 @@ function RecentPostCard({
 }
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [prompt, setPrompt] = useState("");
   const [selectedStyle, setSelectedStyle] = useState<"minimalista" | "colorido" | "corporativo" | "artistico" | "moderno">("moderno");
 
-  // Queries - Dados reais do banco
+  // Queries - Dados reais do banco (só executam se autenticado)
   const { data: images, isLoading: imagesLoading } = trpc.images.list.useQuery({}, {
+    enabled: isAuthenticated,
     staleTime: 30000,
     refetchOnWindowFocus: false,
   });
 
   const { data: projects } = trpc.projects.list.useQuery(undefined, {
+    enabled: isAuthenticated,
     staleTime: 60000,
     refetchOnWindowFocus: false,
   });
 
   const { data: scheduledPosts, isLoading: scheduledLoading } = trpc.scheduling.list.useQuery(undefined, {
+    enabled: isAuthenticated,
     staleTime: 15000,
     refetchOnWindowFocus: false,
   });
 
   const { data: campaigns, isLoading: campaignsLoading } = trpc.campaigns.list.useQuery({}, {
+    enabled: isAuthenticated,
     staleTime: 60000,
     refetchOnWindowFocus: false,
   });
 
   const { data: dashboardStats, isLoading: statsLoading } = trpc.dashboard.stats.useQuery(undefined, {
+    enabled: isAuthenticated,
     staleTime: 30000,
     refetchOnWindowFocus: false,
   });
