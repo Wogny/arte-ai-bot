@@ -9,14 +9,14 @@ const platformOptions = ["instagram", "tiktok", "facebook", "twitter", "linkedin
 // URLs de OAuth para cada plataforma
 const OAUTH_URLS = {
   instagram: {
-    authUrl: "https://api.instagram.com/oauth/authorize",
-    tokenUrl: "https://api.instagram.com/oauth/access_token",
-    scopes: ["user_profile", "user_media"],
+    authUrl: "https://www.facebook.com/v18.0/dialog/oauth", // Instagram Business usa OAuth do Facebook
+    tokenUrl: "https://graph.facebook.com/v18.0/oauth/access_token",
+    scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "instagram_basic", "instagram_content_publish", "business_management"],
   },
   facebook: {
     authUrl: "https://www.facebook.com/v18.0/dialog/oauth",
     tokenUrl: "https://graph.facebook.com/v18.0/oauth/access_token",
-    scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "instagram_basic", "instagram_content_publish"],
+    scopes: ["pages_show_list", "pages_read_engagement", "pages_manage_posts", "instagram_basic", "instagram_content_publish", "business_management"],
   },
   tiktok: {
     authUrl: "https://www.tiktok.com/v2/auth/authorize/",
@@ -40,6 +40,21 @@ const OAUTH_URLS = {
   },
 };
 
+// Função auxiliar para pegar as chaves de API corretas
+function getPlatformCredentials(platform: string) {
+  if (platform === "facebook" || platform === "instagram") {
+    return {
+      clientId: process.env.FACEBOOK_APP_ID || "",
+      clientSecret: process.env.FACEBOOK_APP_SECRET || "",
+    };
+  }
+  
+  return {
+    clientId: process.env[`${platform.toUpperCase()}_CLIENT_ID`] || "",
+    clientSecret: process.env[`${platform.toUpperCase()}_CLIENT_SECRET`] || "",
+  };
+}
+
 export const socialConnectionsRouter = router({
   // Listar conexões do usuário
   list: protectedProcedure.query(async ({ ctx }) => {
@@ -61,6 +76,8 @@ export const socialConnectionsRouter = router({
         });
       }
 
+      const { clientId } = getPlatformCredentials(input.platform);
+
       // Gerar state para segurança
       const state = Buffer.from(JSON.stringify({
         userId: ctx.user.id,
@@ -70,17 +87,12 @@ export const socialConnectionsRouter = router({
 
       // Construir URL de autorização
       const params = new URLSearchParams({
-        client_id: process.env[`${input.platform.toUpperCase()}_CLIENT_ID`] || "",
+        client_id: clientId,
         redirect_uri: input.redirectUri,
         scope: config.scopes.join(","),
         response_type: "code",
         state,
       });
-
-      // Parâmetros específicos por plataforma
-      if (input.platform === "tiktok") {
-        params.set("scope", config.scopes.join(","));
-      }
 
       return {
         authUrl: `${config.authUrl}?${params.toString()}`,
@@ -104,6 +116,8 @@ export const socialConnectionsRouter = router({
         });
       }
 
+      const { clientId, clientSecret } = getPlatformCredentials(input.platform);
+
       try {
         // Trocar código por token
         const tokenResponse = await fetch(config.tokenUrl, {
@@ -112,8 +126,8 @@ export const socialConnectionsRouter = router({
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            client_id: process.env[`${input.platform.toUpperCase()}_CLIENT_ID`] || "",
-            client_secret: process.env[`${input.platform.toUpperCase()}_CLIENT_SECRET`] || "",
+            client_id: clientId,
+            client_secret: clientSecret,
             code: input.code,
             grant_type: "authorization_code",
             redirect_uri: input.redirectUri,
@@ -125,7 +139,7 @@ export const socialConnectionsRouter = router({
         if (tokenData.error) {
           throw new TRPCError({
             code: "BAD_REQUEST",
-            message: tokenData.error_description || "Erro ao obter token",
+            message: tokenData.error_description || tokenData.error?.message || "Erro ao obter token",
           });
         }
 
@@ -283,6 +297,8 @@ export const socialConnectionsRouter = router({
         });
       }
 
+      const { clientId, clientSecret } = getPlatformCredentials(connection.platform);
+
       try {
         const tokenResponse = await fetch(config.tokenUrl, {
           method: "POST",
@@ -290,8 +306,8 @@ export const socialConnectionsRouter = router({
             "Content-Type": "application/x-www-form-urlencoded",
           },
           body: new URLSearchParams({
-            client_id: process.env[`${connection.platform.toUpperCase()}_CLIENT_ID`] || "",
-            client_secret: process.env[`${connection.platform.toUpperCase()}_CLIENT_SECRET`] || "",
+            client_id: clientId,
+            client_secret: clientSecret,
             refresh_token: connection.refreshToken,
             grant_type: "refresh_token",
           }),

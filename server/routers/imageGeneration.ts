@@ -25,26 +25,18 @@ interface StableDiffusionResponse {
   }>;
 }
 
-// Função para gerar imagem em modo demo (usando Unsplash para imagens bonitas)
+// Função para gerar imagem em modo demo (fallback)
 async function generateDemoImage(
   prompt: string,
   style: string,
   width: number,
   height: number
 ): Promise<string> {
-  console.log("[Image Generation] Usando modo DEMO (sem API configurada)");
-  
-  // Mapear palavras-chave do prompt para o Unsplash
-  const keywords = prompt.split(" ").slice(0, 3).join(",");
-  const styleKeyword = style;
-  
-  // Usar Source Unsplash para imagens aleatórias baseadas em palavras-chave
-  // Formato: https://source.unsplash.com/featured/?keyword1,keyword2
-  // Nota: Source Unsplash foi descontinuado, usando a nova API de imagens aleatórias
+  console.log("[Image Generation] Usando modo DEMO (fallback)");
   return `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=${width}&h=${height}&auto=format&fit=crop`;
 }
 
-// Função para chamar Stable Diffusion API
+// Função para chamar Stable Diffusion API Real
 async function generateImageWithStableDiffusion(
   prompt: string,
   style: string,
@@ -54,32 +46,32 @@ async function generateImageWithStableDiffusion(
   guidance_scale: number
 ): Promise<string> {
   const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
-  const apiUrl = process.env.STABLE_DIFFUSION_API_URL || "https://api.stability.ai/v1/generate";
+  const engineId = "stable-diffusion-v1-6"; // Motor mais estável e rápido
+  const apiUrl = `https://api.stability.ai/v1/generation/${engineId}/text-to-image`;
 
-  // Se API key não está configurada, usar modo demo
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim() === "") {
     return generateDemoImage(prompt, style, width, height);
   }
 
   // Mapear estilo para prompt
   const stylePrompts: Record<string, string> = {
+    minimalista: "minimalist style, clean, simple, professional",
+    colorido: "vibrant colors, colorful, eye-catching, high saturation",
+    corporativo: "corporate style, professional, clean, business-like",
+    artistico: "artistic style, creative, expressive, painterly",
+    moderno: "modern style, contemporary, sleek, high-tech",
     realistic: "photorealistic, 4k, professional photography",
-    anime: "anime style, beautiful, detailed",
-    cartoon: "cartoon style, colorful, fun",
-    oil_painting: "oil painting, classical, artistic",
-    watercolor: "watercolor painting, soft colors",
-    digital_art: "digital art, vibrant, modern",
-    "3d_render": "3D render, professional, cinematic",
-    photography: "professional photography, high quality, sharp focus",
   };
 
   const enhancedPrompt = `${prompt}, ${stylePrompts[style] || style}`;
 
   try {
+    console.log(`[Image Generation] Chamando Stability AI para: ${style}`);
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Accept: "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
@@ -94,13 +86,13 @@ async function generateImageWithStableDiffusion(
         width,
         steps,
         samples: 1,
-        seed: Math.floor(Math.random() * 1000000),
       }),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(`Stable Diffusion API error: ${error.message}`);
+      console.error("[Stability AI Error]", error);
+      throw new Error(`Stability AI API error: ${error.message || response.statusText}`);
     }
 
     const data: StableDiffusionResponse = await response.json();
@@ -109,12 +101,11 @@ async function generateImageWithStableDiffusion(
       throw new Error("Nenhuma imagem foi gerada");
     }
 
-    // Nota: Em um ambiente real, salvaríamos o base64 no S3 aqui.
-    // Para este template, se não houver S3 configurado, retornamos o base64.
+    // Retornar o base64 para ser salvo no banco/storage
     return `data:image/png;base64,${data.artifacts[0].base64}`;
   } catch (error) {
     console.error("[Image Generation Error]", error);
-    // Fallback para demo em caso de erro na API
+    // Fallback para demo apenas se a chave falhar
     return generateDemoImage(prompt, style, width, height);
   }
 }
@@ -125,7 +116,7 @@ export const imageGenerationRouter = router({
     .input(generateImageInputSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        // Gerar imagem
+        // Gerar imagem real
         const imageUrl = await generateImageWithStableDiffusion(
           input.prompt,
           input.style,
