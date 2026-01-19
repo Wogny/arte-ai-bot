@@ -52,65 +52,35 @@ export default function AppLayout({ children }: AppLayoutProps) {
     navItems.push({ icon: Shield, label: "Admin", href: "/admin" });
   }
 
-  // Se não estiver autenticado, verificamos se há cache antes de redirecionar
-  if (!isAuthenticated) {
+  // Se estiver carregando e não houver cache, mostramos o loader
+  if (loading) {
+    const cachedUser = localStorage.getItem("manus-runtime-user-info");
+    if (!cachedUser || cachedUser === "null") {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-10 h-10 text-primary animate-spin" />
+            <p className="text-muted-foreground animate-pulse">Validando acesso...</p>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Se não estiver autenticado após o carregamento
+  if (!isAuthenticated && !loading) {
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
     
     if (!publicPages.includes(location)) {
-      // Se houver cache, permitimos a visualização do Dashboard mesmo que a query 'me' esteja carregando ou tenha falhado
-      const cachedUser = localStorage.getItem("manus-runtime-user-info");
-      if (cachedUser && cachedUser !== "null") {
-        return (
-          <div className="min-h-screen bg-background flex">
-            <aside className="w-64 border-r bg-card flex flex-col">
-              <div className="p-6 border-b">
-                <Link href="/dashboard">
-                  <div className="flex items-center gap-2 font-bold text-xl cursor-pointer hover:opacity-80 transition-opacity">
-                    <Sparkles className="w-6 h-6 text-primary" />
-                    <span>MKT Gerenciador</span>
-                  </div>
-                </Link>
-              </div>
-              <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = location === item.href || location.startsWith(item.href + "/");
-                  return (
-                    <Link key={item.href} href={item.href}>
-                      <div className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors cursor-pointer ${isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted text-muted-foreground hover:text-foreground"}`}>
-                        <Icon className="w-5 h-5" />
-                        <span className="font-medium text-sm">{item.label}</span>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </nav>
-            </aside>
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
-          </div>
-        );
-      }
-
-      // Se não houver cache e estiver carregando, mostramos o loader
-      if (loading) {
-        return (
-          <div className="min-h-screen flex items-center justify-center bg-background">
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="w-10 h-10 text-primary animate-spin" />
-              <p className="text-muted-foreground animate-pulse">Validando acesso...</p>
-            </div>
-          </div>
-        );
-      }
-
-      // Se terminou de carregar e realmente não está autenticado (confirmado pelo servidor e sem cache)
       window.location.href = "/login";
       return null;
     }
-    
-    return <>{children}</>;
+  }
+
+  // Se estiver em uma página pública (como login) e já estiver autenticado, redireciona para o dashboard
+  if (isAuthenticated && (location === "/login" || location === "/register")) {
+    window.location.href = "/dashboard";
+    return null;
   }
 
   return (
