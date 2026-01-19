@@ -15,6 +15,8 @@ export async function createContext(
 
   try {
     console.log(`[Auth] Authenticating request: ${opts.req.method} ${opts.req.url}`);
+    console.log(`[Auth] Cookie Header: ${opts.req.headers.cookie || "NONE"}`);
+    console.log(`[Auth] Parsed Cookies: ${JSON.stringify((opts.req as any).cookies || {})}`);
     user = await sdk.authenticateRequest(opts.req);
     if (user) {
       console.log(`[Auth] User authenticated: ${user.email} (ID: ${user.id})`);

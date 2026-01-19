@@ -139,11 +139,13 @@ export const authRouter = router({
       // Definir cookie
       const cookieOptions = {
         maxAge: ONE_YEAR_MS,
-        secure: true, // Vercel sempre usa HTTPS
-        sameSite: "lax" as const,
+        secure: true, // Obrigatório para HTTPS no Vercel
+        sameSite: "none" as const, // Necessário para cross-site cookies se houver redirecionamentos
         httpOnly: true,
         path: "/",
       };
+      
+      console.log(`[Auth] Setting session cookie for user: ${user.email}`);
       ctx.res.cookie(COOKIE_NAME, sessionToken, cookieOptions);
 
       return {
