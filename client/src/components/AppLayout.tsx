@@ -98,26 +98,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
     
     if (!publicPages.includes(location)) {
-      // Verificamos se realmente não há dados no localStorage como fallback rápido
-      const cachedUser = localStorage.getItem("manus-runtime-user-info");
-      
-      // Se não houver cache, esperamos um pouco mais antes de desistir (resiliência para Vercel)
-      if (!cachedUser || cachedUser === "null") {
-        // Se já carregou e ainda não tem usuário, aí sim redirecionamos
-        if (!loading) {
-          window.location.href = "/login";
-          return null;
-        }
-      }
-      // Se houver cache, mostramos o loader enquanto o 'me' valida
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            <p className="text-muted-foreground animate-pulse">Sincronizando sessão...</p>
+      // Se ainda estiver carregando a query 'me', mostramos o loader
+      if (loading) {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="flex flex-col items-center gap-4">
+              <Loader2 className="w-10 h-10 text-primary animate-spin" />
+              <p className="text-muted-foreground animate-pulse">Validando acesso...</p>
+            </div>
           </div>
-        </div>
-      );
+        );
+      }
+
+      // Se terminou de carregar e realmente não está autenticado
+      window.location.href = "/login";
+      return null;
     }
     
     return <>{children}</>;

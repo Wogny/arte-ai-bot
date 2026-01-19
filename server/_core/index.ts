@@ -8,8 +8,10 @@ import { appRouter } from "../routers.js";
 import { createContext } from "./context.js";
 import { serveStatic, setupVite } from "./vite.js";
 import { mercadopagoWebhookRouter } from "../routes/mercadopago-webhook.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 const server = createServer(app);
 
 // Webhook do Mercado Pago
