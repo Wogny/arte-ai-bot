@@ -106,7 +106,7 @@ export const authRouter = router({
         password: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const user = await db.getUserByEmail(input.email);
       if (!user || !user.passwordHash) {
         throw new TRPCError({
