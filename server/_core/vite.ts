@@ -52,7 +52,7 @@ export function serveStatic(app: Express) {
     process.env.NODE_ENV === "development"
       ? path.resolve(import.meta.dirname, "../..", "dist", "public")
       : process.env.VERCEL
-        ? path.resolve(process.cwd(), "dist", "public")
+        ? path.resolve(process.cwd(), "dist/public")
         : path.resolve(import.meta.dirname, "public");
   if (!fs.existsSync(distPath)) {
     console.error(
