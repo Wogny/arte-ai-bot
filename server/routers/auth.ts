@@ -58,34 +58,43 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      // Verificar se email já existe
-      const existingUser = await db.getUserByEmail(input.email);
-      if (existingUser) {
+      try {
+        // Verificar se email já existe
+        const existingUser = await db.getUserByEmail(input.email);
+        if (existingUser) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "Email já cadastrado",
+          });
+        }
+
+        // Hash da senha
+        const passwordHash = hashPassword(input.password);
+
+        // Criar usuário com openId único (baseado em email)
+        const openId = `email_${crypto.randomBytes(16).toString("hex")}`;
+        await db.upsertUser({
+          openId,
+          email: input.email,
+          name: input.name,
+          loginMethod: "email",
+          passwordHash,
+          emailVerified: true, // Marcando como verificado para facilitar o teste inicial
+        });
+
+        return {
+          success: true,
+          message: "Usuário criado com sucesso! Você já pode fazer login.",
+          email: input.email,
+        };
+      } catch (error: any) {
+        console.error("[Auth] Registration error:", error);
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
-          code: "CONFLICT",
-          message: "Email já cadastrado",
+          code: "INTERNAL_SERVER_ERROR",
+          message: error.message || "Erro interno ao criar conta",
         });
       }
-
-      // Hash da senha
-      const passwordHash = hashPassword(input.password);
-
-      // Criar usuário com openId único (baseado em email)
-      const openId = `email_${crypto.randomBytes(16).toString("hex")}`;
-      await db.upsertUser({
-        openId,
-        email: input.email,
-        name: input.name,
-        loginMethod: "email",
-        passwordHash,
-        emailVerified: true, // Marcando como verificado para facilitar o teste inicial
-      });
-
-      return {
-        success: true,
-        message: "Usuário criado com sucesso! Você já pode fazer login.",
-        email: input.email,
-      };
     }),
 
   // Login com email/senha

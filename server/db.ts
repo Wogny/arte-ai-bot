@@ -70,12 +70,19 @@ import { ENV } from './_core/env';
 let _db: ReturnType<typeof drizzle> | null = null;
 
 export async function getDb() {
-  if (!_db && process.env.DATABASE_URL) {
+  if (!_db) {
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      console.error("[Database] DATABASE_URL is not defined");
+      return null;
+    }
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = drizzle(dbUrl);
+      console.log("[Database] Connected successfully");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      console.error("[Database] Failed to connect:", error);
       _db = null;
+      throw error; // Propagar o erro para ser capturado pelo tRPC
     }
   }
   return _db;
