@@ -72,8 +72,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
     
     if (!publicPages.includes(location)) {
-      window.location.href = "/login";
-      return null;
+      // Verificamos se há cache antes de redirecionar, para evitar redirecionamentos intermitentes
+      const cachedUser = localStorage.getItem("manus-runtime-user-info");
+      if (!cachedUser || cachedUser === "null") {
+        console.log("[AppLayout] Sem autenticação e sem cache, redirecionando para login...");
+        window.location.href = "/login";
+        return null;
+      }
+      // Se houver cache, permitimos que o layout renderize enquanto a query 'me' tenta novamente ou o usuário decide o que fazer
+      console.log("[AppLayout] Sem autenticação mas com cache, mantendo no dashboard...");
     }
   }
 
