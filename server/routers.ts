@@ -130,29 +130,41 @@ export const appRouter = router({
         projectId: z.number().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        const enhancedPrompt = `Create a ${input.visualStyle} style ${input.contentType} for social media. ${input.prompt}`;
+        console.log("[Images] Gerando imagem para prompt:", input.prompt);
+        
+        let imageUrl: string;
+        const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
 
-        const result = await generateImage({
-          prompt: enhancedPrompt,
-        });
+        if (!apiKey) {
+          console.log("[Images] Modo DEMO: Usando Unsplash");
+          // Usar Unsplash Source para imagens aleatórias bonitas
+          // Formato: https://images.unsplash.com/photo-<id>?q=80&w=800
+          // Usando uma imagem genérica de alta qualidade como placeholder
+          imageUrl = "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop";
+        } else {
+          const enhancedPrompt = `Create a ${input.visualStyle} style ${input.contentType} for social media. ${input.prompt}`;
+          const result = await generateImage({
+            prompt: enhancedPrompt,
+          });
 
-        if (!result.url) {
-          throw new Error("Failed to generate image");
+          if (!result.url) {
+            throw new Error("Failed to generate image");
+          }
+          imageUrl = result.url;
         }
 
-        const response = await fetch(result.url);
-        const imageBuffer = Buffer.from(await response.arrayBuffer());
-        
         const fileKey = `${ctx.user.id}/images/${nanoid()}.png`;
-        const { url: s3Url } = await storagePut(fileKey, imageBuffer, "image/png");
-
+        
+        // Se for URL externa (Unsplash), salvamos a URL diretamente
+        // Se for da API real, poderíamos baixar e salvar no S3, mas para o demo vamos usar a URL
+        
         const savedImage = await db.saveGeneratedImage({
           userId: ctx.user.id,
           projectId: input.projectId ?? null,
           prompt: input.prompt,
           visualStyle: input.visualStyle,
           contentType: input.contentType,
-          imageUrl: s3Url,
+          imageUrl: imageUrl,
           imageKey: fileKey,
         });
 
@@ -283,24 +295,10 @@ export const appRouter = router({
     update: protectedProcedure
       .input(z.object({
         postId: z.number(),
-        caption: z.string().optional(),
-        scheduledFor: z.date().optional(),
-        platform: z.enum(["facebook", "instagram", "both"]).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const { postId, ...data } = input;
-        await db.updateScheduledPost(postId, ctx.user.id, data);
-        return { success: true };
-      }),
-
-    updateStatus: protectedProcedure
-      .input(z.object({
-        postId: z.number(),
         status: z.enum(["draft", "pending_approval", "approved", "scheduled", "published", "failed", "cancelled"]),
-        errorMessage: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
-        await db.updatePostStatus(input.postId, ctx.user.id, input.status, input.errorMessage);
+        await db.updatePostStatus(input.postId, ctx.user.id, input.status);
         return { success: true };
       }),
 
@@ -311,193 +309,4 @@ export const appRouter = router({
         return { success: true };
       }),
   }),
-
-  campaigns: router({
-    downloadTemplate: publicProcedure.query(async () => {
-      const { generateCSVTemplate } = await import("./csvParser");
-      return { template: generateCSVTemplate() };
-    }),
-
-    importCSV: protectedProcedure
-      .input(z.object({ csvContent: z.string() }))
-      .mutation(async ({ ctx, input }) => {
-        const { parseCSV } = await import("./csvParser");
-        
-        const parseResult = parseCSV(input.csvContent);
-        
-        if (!parseResult.success && parseResult.errors.length > 0) {
-          throw new Error(`Erro ao importar CSV: ${parseResult.errors[0].message}`);
-        }
-
-        const importedCampaigns = await Promise.all(
-          parseResult.campaigns.map((campaign: any) =>
-            db.createCampaign({
-              userId: ctx.user.id,
-              name: campaign.name,
-              platform: campaign.platform,
-              startDate: new Date(campaign.startDate),
-              endDate: campaign.endDate ? new Date(campaign.endDate) : undefined,
-              metrics: {
-                impressions: campaign.impressions,
-                reach: campaign.reach,
-                engagement: campaign.engagement,
-                clicks: campaign.clicks,
-                conversions: campaign.conversions,
-                spend: campaign.spend,
-              },
-            })
-          )
-        );
-
-        return {
-          imported: importedCampaigns.length,
-          campaigns: importedCampaigns,
-        };
-      }),
-
-    create: protectedProcedure
-      .input(z.object({
-        name: z.string().min(1),
-        projectId: z.number().optional(),
-        platform: z.string().min(1),
-        startDate: z.date(),
-        endDate: z.date().optional(),
-        metrics: z.object({
-          impressions: z.number().optional(),
-          reach: z.number().optional(),
-          engagement: z.number().optional(),
-          clicks: z.number().optional(),
-          conversions: z.number().optional(),
-          spend: z.number().optional(),
-        }).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        return await db.createCampaign({
-          userId: ctx.user.id,
-          ...input,
-        });
-      }),
-
-    list: protectedProcedure
-      .input(z.object({ projectId: z.number().optional() }))
-      .query(async ({ ctx, input }) => {
-        return await db.getUserCampaigns(ctx.user.id, input.projectId);
-      }),
-
-    getById: protectedProcedure
-      .input(z.object({ campaignId: z.number() }))
-      .query(async ({ ctx, input }) => {
-        return await db.getCampaignById(input.campaignId, ctx.user.id);
-      }),
-
-    update: protectedProcedure
-      .input(z.object({
-        campaignId: z.number(),
-        name: z.string().min(1).optional(),
-        platform: z.string().optional(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-        metrics: z.object({
-          impressions: z.number().optional(),
-          reach: z.number().optional(),
-          engagement: z.number().optional(),
-          clicks: z.number().optional(),
-          conversions: z.number().optional(),
-          spend: z.number().optional(),
-        }).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        const { campaignId, ...data } = input;
-        await db.updateCampaign(campaignId, ctx.user.id, data);
-        return { success: true };
-      }),
-
-    delete: protectedProcedure
-      .input(z.object({ campaignId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        await db.deleteCampaign(input.campaignId, ctx.user.id);
-        return { success: true };
-      }),
-  }),
-
-  recommendations: router({
-    generateFromCampaigns: protectedProcedure
-      .input(z.object({ projectId: z.number().optional() }))
-      .mutation(async ({ ctx, input }) => {
-        const { analyzeCampaigns } = await import("./llmAnalysis");
-        const { notifyOwner } = await import("./_core/notification");
-        
-        const campaigns = await db.getUserCampaigns(ctx.user.id, input.projectId);
-        
-        if (campaigns.length === 0) {
-          throw new Error("Nenhuma campanha disponível para análise");
-        }
-
-        let niche: string | undefined;
-        if (input.projectId) {
-          const project = await db.getProjectById(input.projectId, ctx.user.id);
-          niche = project?.niche;
-        }
-
-        const analysis = await analyzeCampaigns(campaigns, niche);
-
-        const savedRecommendations = await Promise.all(
-          analysis.recommendations.map((rec: any) =>
-            db.createRecommendation({
-              userId: ctx.user.id,
-              projectId: input.projectId ?? null,
-              type: rec.type,
-              title: rec.title,
-              description: rec.description,
-              priority: rec.priority,
-            })
-          )
-        );
-
-        const highPriorityCount = savedRecommendations.filter((r: any) => r.priority === "high").length;
-        await notifyOwner({
-          title: "Novas Recomendações Geradas",
-          content: `${savedRecommendations.length} novas recomendações foram geradas${highPriorityCount > 0 ? `, incluindo ${highPriorityCount} de alta prioridade` : ""}. Acesse o painel para visualizar.`,
-        });
-
-        return {
-          insights: analysis.insights,
-          recommendations: savedRecommendations,
-        };
-      }),
-
-    list: protectedProcedure
-      .input(z.object({ unreadOnly: z.boolean().optional() }))
-      .query(async ({ ctx, input }) => {
-        return await db.getUserRecommendations(ctx.user.id, input.unreadOnly);
-      }),
-
-    markAsRead: protectedProcedure
-      .input(z.object({ recommendationId: z.number() }))
-      .mutation(async ({ ctx, input }) => {
-        await db.markRecommendationAsRead(input.recommendationId, ctx.user.id);
-        return { success: true };
-      }),
-  }),
-
-  userSettings: router({
-    get: protectedProcedure.query(async ({ ctx }) => {
-      return await db.getUserAdminSettings(ctx.user.id);
-    }),
-
-    update: protectedProcedure
-      .input(z.object({
-        theme: z.string().optional(),
-        timezone: z.string().optional(),
-        language: z.string().optional(),
-        notificationsEnabled: z.boolean().optional(),
-        emailNotifications: z.boolean().optional(),
-        defaultPlatforms: z.array(z.string()).optional(),
-      }))
-      .mutation(async ({ ctx, input }) => {
-        return await db.upsertUserAdminSettings(ctx.user.id, input);
-      }),
-  }),
 });
-
-export type AppRouter = typeof appRouter;

@@ -5,6 +5,7 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import AppLayout from "./components/AppLayout";
+import { ToastProvider } from "./components/ToastProvider";
 import { Loader2 } from "lucide-react";
 
 // Lazy load pages for better performance
@@ -130,6 +131,7 @@ function App() {
 
   return (
     <ThemeProvider defaultTheme="dark">
+      <ToastProvider />
       <TooltipProvider>
         <ErrorBoundary>
           <Switch>
