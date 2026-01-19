@@ -6,7 +6,7 @@ import {
   WhatsAppIntegration,
 } from "../platformIntegrations";
 import { getDb } from "../db";
-import { platformCredentials } from "../../drizzle/schema";
+import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 
 export const oauthRouter = router({

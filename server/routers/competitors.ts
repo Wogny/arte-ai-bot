@@ -9,7 +9,7 @@ import {
   competitorDailyMetrics,
   competitorHashtags,
   competitorPostingSchedule,
-} from "../../drizzle/schema";
+} from '../../drizzle/schema.js';
 import { eq, and, gte, desc } from "drizzle-orm";
 
 export const competitorsRouter = router({

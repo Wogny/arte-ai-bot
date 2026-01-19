@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { multiPlatformPosts, campaigns, platformCredentials } from "../../drizzle/schema";
+import { multiPlatformPosts, campaigns, platformCredentials } from '../../drizzle/schema.js';
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { getMetaGraphService } from "../metaGraphAPI";

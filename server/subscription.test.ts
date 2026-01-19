@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { getDb } from './db';
-import { subscriptions, payments, subscriptionPlans } from '../drizzle/schema';
+import { subscriptions, payments, subscriptionPlans } from '../drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 
 describe('Subscription Router', () => {

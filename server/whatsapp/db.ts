@@ -12,7 +12,7 @@ import {
   whatsappApprovalRequests,
   whatsappNotificationSettings,
   multiPlatformPosts,
-} from "../../drizzle/schema";
+} from '../../drizzle/schema.js';
 
 // Tipos para os enums
 type ConversationStatus = "active" | "archived" | "blocked";

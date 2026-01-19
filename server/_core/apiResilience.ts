@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 import { getDb } from "../db";
-import { platformCredentials } from "../../drizzle/schema";
+import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { decrypt, encrypt } from "./security";
 

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { workspaceProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { outgoingWebhooks, workspaces } from "../../drizzle/schema";
+import { outgoingWebhooks, workspaces } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { nanoid } from "nanoid";

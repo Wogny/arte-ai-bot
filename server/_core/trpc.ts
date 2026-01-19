@@ -3,7 +3,7 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import type { TrpcContext } from "./context";
 import { getDb } from "../db.js";
-import { workspaceMembers } from "../../drizzle/schema";
+import { workspaceMembers } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 
 const t = initTRPC.context<TrpcContext>().create({

@@ -1,5 +1,5 @@
 import { getDb } from "../db";
-import { outgoingWebhooks } from "../../drizzle/schema";
+import { outgoingWebhooks } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 

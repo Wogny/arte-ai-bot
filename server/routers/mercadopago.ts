@@ -1,6 +1,6 @@
 import { router, protectedProcedure } from '../_core/trpc';
 import { z } from 'zod';
-import { subscriptions } from '../../drizzle/schema';
+import { subscriptions } from '../../drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 
 const MERCADOPAGO_API_URL = 'https://api.mercadopago.com/v1';

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { getDb } from './db';
-import { subscriptions, payments } from '../drizzle/schema';
+import { subscriptions, payments } from '../drizzle/schema.js';
 import { eq } from 'drizzle-orm';
 
 describe('Mercado Pago Payment Flow', () => {

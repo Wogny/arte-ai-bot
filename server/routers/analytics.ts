@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { multiPlatformPosts, campaigns } from "../../drizzle/schema";
+import { multiPlatformPosts, campaigns } from '../../drizzle/schema.js';
 import { withCache } from "../_core/cache";
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";

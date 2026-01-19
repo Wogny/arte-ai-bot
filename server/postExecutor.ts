@@ -1,6 +1,6 @@
 import { CronJob } from "cron";
 import { getDb } from "./db";
-import { scheduledPosts, platformCredentials, generatedImages } from "../drizzle/schema";
+import { scheduledPosts, platformCredentials, generatedImages } from '../drizzle/schema.js';
 import { eq, and, lte } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification";
 import { callPlatformApi } from "./_core/apiResilience";

@@ -1,5 +1,5 @@
 import { invokeLLM } from "./_core/llm";
-import type { Campaign } from "../drizzle/schema";
+import type { Campaign } from '../drizzle/schema.js';
 
 export interface AnalysisResult {
   recommendations: Array<{

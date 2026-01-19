@@ -11,7 +11,7 @@ import {
   PlatformType,
 } from "../contentAutomation";
 import { getDb } from "../db";
-import { generatedImages } from "../../drizzle/schema";
+import { generatedImages } from '../../drizzle/schema.js';
 import { eq } from "drizzle-orm";
 
 export const contentAutomationRouter = router({

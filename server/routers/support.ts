@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { supportTickets, faqEntries } from "../../drizzle/schema";
+import { supportTickets, faqEntries } from '../../drizzle/schema.js';
 import { eq, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 

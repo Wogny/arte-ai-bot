@@ -1,5 +1,5 @@
 import { getDb } from "../db";
-import { subscriptions, scheduledPosts, platformCredentials } from "../../drizzle/schema";
+import { subscriptions, scheduledPosts, platformCredentials } from '../../drizzle/schema.js';
 import { eq, and, count, gte } from "drizzle-orm";
 
 export type PlanType = "STARTER" | "PROFESSIONAL" | "ENTERPRISE";

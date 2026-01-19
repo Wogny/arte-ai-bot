@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import * as db from "./db";
-import { platformCredentials } from "../drizzle/schema";
+import { platformCredentials } from '../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 
 interface MetaMetrics {

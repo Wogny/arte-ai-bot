@@ -6,7 +6,7 @@ import {
   competitorDailyMetrics,
   competitorHashtags,
   competitorPostingSchedule,
-} from "../drizzle/schema";
+} from '../drizzle/schema.js';
 import { eq, and, gte, lte } from "drizzle-orm";
 
 interface CompetitorPostData {

@@ -1,7 +1,7 @@
 import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { getDb } from "../db";
-import { subscriptions, payments, subscriptionPlans } from "../../drizzle/schema";
+import { subscriptions, payments, subscriptionPlans } from '../../drizzle/schema.js';
 import { eq, desc, and } from "drizzle-orm";
 
 export const subscriptionRouter = router({

@@ -1,5 +1,5 @@
 import { getDb } from "../db";
-import { auditLogs } from "../../drizzle/schema";
+import { auditLogs } from '../../drizzle/schema.js';
 
 interface AuditLogParams {
   workspaceId: number;

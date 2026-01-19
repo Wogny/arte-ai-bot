@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, publicProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
-import { promptTemplates } from "../../drizzle/schema";
+import { promptTemplates } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 

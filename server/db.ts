@@ -64,7 +64,7 @@ import {
   GenerationHistory,
   subscriptions,
   usageTracking,
-} from "../drizzle/schema";
+} from '../drizzle/schema.js';
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1006,7 +1006,7 @@ import {
   socialConnections,
   SocialConnection,
   InsertSocialConnection,
-} from "../drizzle/schema";
+} from '../drizzle/schema.js';
 
 export async function saveCaptionHistory(data: {
   userId: number;

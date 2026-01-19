@@ -2,7 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc";
 import { getDb } from "../db";
 import { TRPCError } from "@trpc/server";
-import { subscriptions, payments, subscriptionPlans } from "../../drizzle/schema";
+import { subscriptions, payments, subscriptionPlans } from '../../drizzle/schema.js';
 import { eq } from "drizzle-orm";
 
 // Mercado Pago é usado em vez do Stripe
