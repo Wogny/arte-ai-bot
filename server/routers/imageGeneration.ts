@@ -25,17 +25,6 @@ interface StableDiffusionResponse {
   }>;
 }
 
-// Função para gerar imagem em modo demo (fallback)
-async function generateDemoImage(
-  prompt: string,
-  style: string,
-  width: number,
-  height: number
-): Promise<string> {
-  console.log("[Image Generation] Usando modo DEMO (fallback)");
-  return `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=${width}&h=${height}&auto=format&fit=crop`;
-}
-
 // Função para chamar Stable Diffusion API Real
 async function generateImageWithStableDiffusion(
   prompt: string,
@@ -46,14 +35,16 @@ async function generateImageWithStableDiffusion(
   guidance_scale: number
 ): Promise<string> {
   const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
-  const engineId = "stable-diffusion-v1-6"; // Motor mais estável e rápido
+  const engineId = "stable-diffusion-v1-6";
   const apiUrl = `https://api.stability.ai/v1/generation/${engineId}/text-to-image`;
 
   if (!apiKey || apiKey.trim() === "") {
-    return generateDemoImage(prompt, style, width, height);
+    console.error("[Image Generation] ERRO: STABLE_DIFFUSION_API_KEY não encontrada no .env");
+    throw new Error("API Key da Stability AI não configurada.");
   }
 
-  // Mapear estilo para prompt
+  console.log(`[Image Generation] Iniciando geração real com API Key: ${apiKey.substring(0, 5)}...`);
+
   const stylePrompts: Record<string, string> = {
     minimalista: "minimalist style, clean, simple, professional",
     colorido: "vibrant colors, colorful, eye-catching, high saturation",
@@ -66,7 +57,6 @@ async function generateImageWithStableDiffusion(
   const enhancedPrompt = `${prompt}, ${stylePrompts[style] || style}`;
 
   try {
-    console.log(`[Image Generation] Chamando Stability AI para: ${style}`);
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -90,33 +80,30 @@ async function generateImageWithStableDiffusion(
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      console.error("[Stability AI Error]", error);
-      throw new Error(`Stability AI API error: ${error.message || response.statusText}`);
+      const errorData = await response.json();
+      console.error("[Stability AI API Error]", JSON.stringify(errorData));
+      throw new Error(`Erro na API Stability AI: ${errorData.message || response.statusText}`);
     }
 
     const data: StableDiffusionResponse = await response.json();
 
     if (!data.artifacts || data.artifacts.length === 0) {
-      throw new Error("Nenhuma imagem foi gerada");
+      throw new Error("Nenhuma imagem foi retornada pela API.");
     }
 
-    // Retornar o base64 para ser salvo no banco/storage
+    console.log("[Image Generation] Imagem gerada com sucesso pela Stability AI.");
     return `data:image/png;base64,${data.artifacts[0].base64}`;
   } catch (error) {
-    console.error("[Image Generation Error]", error);
-    // Fallback para demo apenas se a chave falhar
-    return generateDemoImage(prompt, style, width, height);
+    console.error("[Image Generation Exception]", error);
+    throw error;
   }
 }
 
 export const imageGenerationRouter = router({
-  // Gerar imagem com IA
   generate: protectedProcedure
     .input(generateImageInputSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        // Gerar imagem real
         const imageUrl = await generateImageWithStableDiffusion(
           input.prompt,
           input.style,
@@ -126,7 +113,6 @@ export const imageGenerationRouter = router({
           input.guidance_scale
         );
 
-        // Salvar no banco de dados
         const generatedImage = await db.saveGeneratedImage({
           userId: ctx.user.id,
           projectId: input.projectId || null,
@@ -144,15 +130,14 @@ export const imageGenerationRouter = router({
           message: "Imagem gerada com sucesso!",
         };
       } catch (error) {
-        console.error("[Generate Image Error]", error);
+        console.error("[TRPC Generate Error]", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Erro ao processar geração de imagem",
+          message: error instanceof Error ? error.message : "Erro ao processar geração de imagem",
         });
       }
     }),
 
-  // Listar imagens geradas
   list: protectedProcedure
     .input(
       z.object({
@@ -162,11 +147,9 @@ export const imageGenerationRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      const images = await db.getUserImages(ctx.user.id, input.projectId);
-      return images;
+      return await db.getUserImages(ctx.user.id, input.projectId);
     }),
 
-  // Obter imagem por ID
   getById: protectedProcedure
     .input(z.object({ imageId: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -180,7 +163,6 @@ export const imageGenerationRouter = router({
       return image;
     }),
 
-  // Deletar imagem
   delete: protectedProcedure
     .input(z.object({ imageId: z.number() }))
     .mutation(async ({ ctx, input }) => {
