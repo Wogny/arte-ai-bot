@@ -49,6 +49,7 @@ export const authRouter = router({
       success: true,
     } as const;
   }),
+
   // Registro de novo usuário
   register: publicProcedure
     .input(
@@ -80,12 +81,12 @@ export const authRouter = router({
           name: input.name,
           loginMethod: "email",
           passwordHash,
-          emailVerified: true, // Marcando como verificado para facilitar o teste inicial
+          emailVerified: false, // Por padrão, email não verificado
         });
 
         return {
           success: true,
-          message: "Usuário criado com sucesso! Você já pode fazer login.",
+          message: "Usuário criado com sucesso! Verifique seu email para ativar sua conta.",
           email: input.email,
         };
       } catch (error: any) {
@@ -139,8 +140,8 @@ export const authRouter = router({
       // Definir cookie
       const cookieOptions = {
         maxAge: ONE_YEAR_MS,
-        secure: true, // Obrigatório para HTTPS no Vercel
-        sameSite: "none" as const, // Necessário para cross-site cookies se houver redirecionamentos
+        secure: process.env.NODE_ENV === "production",
+        sameSite: (process.env.NODE_ENV === "production" ? "none" : "lax") as const,
         httpOnly: true,
         path: "/",
       };
