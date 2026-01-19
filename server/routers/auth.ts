@@ -139,7 +139,7 @@ export const authRouter = router({
       // Definir cookie
       const cookieOptions = {
         maxAge: ONE_YEAR_MS,
-        secure: process.env.NODE_ENV === "production",
+        secure: true, // Vercel sempre usa HTTPS
         sameSite: "lax" as const,
         httpOnly: true,
         path: "/",

@@ -14,9 +14,15 @@ export async function createContext(
   let user: User | null = null;
 
   try {
+    console.log(`[Auth] Authenticating request: ${opts.req.method} ${opts.req.url}`);
     user = await sdk.authenticateRequest(opts.req);
-  } catch (error) {
-    // Authentication is optional for public procedures.
+    if (user) {
+      console.log(`[Auth] User authenticated: ${user.email} (ID: ${user.id})`);
+    } else {
+      console.log(`[Auth] No user found for request`);
+    }
+  } catch (error: any) {
+    console.log(`[Auth] Authentication failed: ${error.message}`);
     user = null;
   }
 

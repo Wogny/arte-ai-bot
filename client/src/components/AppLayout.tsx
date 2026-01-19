@@ -97,13 +97,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
     // Se estiver em uma rota protegida, redireciona para o login
     const publicPages = ["/", "/login", "/register", "/forgot-password", "/pricing", "/landing"];
     
-    // Adicionamos um pequeno delay mental ou verificação extra para evitar redirecionamentos falsos
     if (!publicPages.includes(location)) {
       // Verificamos se realmente não há dados no localStorage como fallback rápido
       const cachedUser = localStorage.getItem("manus-runtime-user-info");
+      
+      // Se não houver cache, esperamos um pouco mais antes de desistir (resiliência para Vercel)
       if (!cachedUser || cachedUser === "null") {
-        window.location.href = "/login";
-        return null;
+        // Se já carregou e ainda não tem usuário, aí sim redirecionamos
+        if (!loading) {
+          window.location.href = "/login";
+          return null;
+        }
       }
       // Se houver cache, mostramos o loader enquanto o 'me' valida
       return (
