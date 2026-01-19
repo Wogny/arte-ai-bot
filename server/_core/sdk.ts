@@ -156,6 +156,9 @@ class SDKServer {
 
   private getSessionSecret() {
     const secret = ENV.cookieSecret;
+    if (!secret || secret.length === 0) {
+      console.error("[Auth] ERROR: cookieSecret is empty! Fallback might have failed.");
+    }
     return new TextEncoder().encode(secret);
   }
 
