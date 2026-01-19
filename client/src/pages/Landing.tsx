@@ -1,6 +1,7 @@
 import { useState } from "react";
 // Removido Link do wouter para evitar erro de pushState com domínios diferentes
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 import { 
   Sparkles, 
   Zap, 
@@ -20,9 +21,13 @@ import {
 } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
-// Função helper para redirecionar para OAuth
+// Função helper para redirecionar para a página de login interna
 const handleLoginClick = () => {
-  window.location.href = getLoginUrl();
+  window.location.href = "/login";
+};
+
+const handleRegisterClick = () => {
+  window.location.href = "/register";
 };
 
 // Ícone do TikTok
@@ -318,7 +323,7 @@ export default function Landing() {
               style={{
                 background: "linear-gradient(135deg, #a855f7, #ec4899)",
               }}
-              onClick={handleLoginClick}
+              onClick={handleRegisterClick}
             >
               Começar Grátis
             </Button>
@@ -366,7 +371,7 @@ export default function Landing() {
               style={{
                 background: "linear-gradient(135deg, #a855f7, #ec4899)",
               }}
-              onClick={handleLoginClick}
+              onClick={handleRegisterClick}
             >
               Começar Agora
               <ArrowRight className="w-4 h-4 ml-2" />
@@ -572,7 +577,7 @@ export default function Landing() {
               style={{
                 background: "linear-gradient(135deg, #a855f7, #ec4899)",
               }}
-              onClick={handleLoginClick}
+              onClick={handleRegisterClick}
             >
               Começar Agora
             </Button>
