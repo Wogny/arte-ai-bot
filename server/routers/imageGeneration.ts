@@ -6,7 +6,7 @@ import { nanoid } from "nanoid";
 
 // Validação de entrada
 const generateImageInputSchema = z.object({
-  prompt: z.string().min(10, "Prompt deve ter no mínimo 10 caracteres"),
+  prompt: z.string().min(3, "Prompt deve ter no mínimo 3 caracteres"),
   style: z.string().default("realistic"),
   width: z.number().int().min(256).max(2048).default(1024),
   height: z.number().int().min(256).max(2048).default(1024),
