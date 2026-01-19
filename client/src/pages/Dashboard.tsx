@@ -126,11 +126,18 @@ function RecentPostCard({
     >
       {/* Imagem do Post */}
       <div className="h-28 bg-gradient-to-br from-purple-600/40 to-pink-600/40 flex items-center justify-center">
-        {image ? (
-          <img src={image} alt={title} className="w-full h-full object-cover" />
-        ) : (
-          <Sparkles className="w-10 h-10 text-purple-300/60" />
-        )}
+        {(() => {
+          if (!image) return <Sparkles className="w-10 h-10 text-purple-300/60" />;
+          try {
+            // Se for base64 ou URL válida, renderiza
+            if (image.startsWith('data:') || image.startsWith('blob:') || image.startsWith('http')) {
+              return <img src={image} alt={title} className="w-full h-full object-cover" />;
+            }
+            return <Sparkles className="w-10 h-10 text-purple-300/60" />;
+          } catch (e) {
+            return <Sparkles className="w-10 h-10 text-purple-300/60" />;
+          }
+        })()}
       </div>
       
       {/* Conteúdo */}

@@ -79,11 +79,18 @@ export default function Gallery() {
               <Card key={image.id} className="overflow-hidden hover:shadow-xl transition-shadow border-2">
                 <CardHeader className="p-0">
                   <div className="aspect-square relative overflow-hidden bg-muted">
-                    <img 
-                      src={image.imageUrl} 
-                      alt={image.prompt}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                    />
+                    {(() => {
+                      const src = image.imageUrl;
+                      const isValid = src && (src.startsWith('http') || src.startsWith('data:') || src.startsWith('blob:'));
+                      if (!isValid) return <div className="w-full h-full flex items-center justify-center bg-muted"><ImageIcon className="w-12 h-12 text-muted-foreground" /></div>;
+                      return (
+                        <img 
+                          src={src} 
+                          alt={image.prompt}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      );
+                    })()}
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
