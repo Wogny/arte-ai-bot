@@ -1,0 +1,69 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1767560714473,
+      "tag": "0000_huge_amazoness",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1767561504814,
+      "tag": "0001_white_shinko_yamashiro",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1767561902457,
+      "tag": "0002_nice_clint_barton",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1767704897581,
+      "tag": "0003_fancy_joshua_kane",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1767712774715,
+      "tag": "0004_slimy_white_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1767714343817,
+      "tag": "0005_familiar_red_wolf",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1767820121716,
+      "tag": "0006_happy_terrax",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1767990826786,
+      "tag": "0007_minor_iceman",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1768521020897,
+      "tag": "0008_lying_silk_fever",
+      "breakpoints": true
+    }
+  ]
+}
