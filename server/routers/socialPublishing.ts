@@ -2,6 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db.js";
+import { apiConfigs } from "../integrations/apis-config.js";
 
 // Validação de entrada
 const publishPostInputSchema = z.object({
@@ -76,6 +77,102 @@ async function publishToInstagram(
   }
 }
 
+// Função para publicar no Facebook
+async function publishToFacebook(
+  caption: string,
+  imageUrl: string,
+  accessToken: string,
+  pageId: string
+): Promise<{ postId: string; url: string }> {
+  try {
+    console.log(`[Facebook] Iniciando postagem para página: ${pageId}`);
+    
+    // Publicar foto na página
+    const response = await fetch(
+      `https://graph.facebook.com/v18.0/${pageId}/photos`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: imageUrl,
+          caption: caption,
+          access_token: accessToken,
+          published: true,
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`Erro ao publicar: ${data.error?.message || "Erro desconhecido"}`);
+    }
+
+    return {
+      postId: data.id,
+      url: `https://www.facebook.com/${pageId}/posts/${data.id}`,
+    };
+  } catch (error) {
+    console.error("[Facebook Publish Error]", error);
+    throw new Error(
+      `Erro ao publicar no Facebook: ${error instanceof Error ? error.message : "Desconhecido"}`
+    );
+  }
+}
+
+// Função para publicar no TikTok
+async function publishToTikTok(
+  caption: string,
+  imageUrl: string,
+  accessToken: string,
+  userId: string
+): Promise<{ postId: string; url: string }> {
+  try {
+    console.log(`[TikTok] Iniciando postagem para usuário: ${userId}`);
+    
+    // Fazer upload da imagem para TikTok
+    // Nota: TikTok requer que o vídeo/imagem seja enviado como multipart/form-data
+    // Para simplificar, estamos usando a API de criação de rascunho
+    
+    const response = await fetch(
+      `https://open.tiktokapis.com/v1/post/publish/action/publish/`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          data: {
+            video: {
+              source: imageUrl, // URL da imagem
+            },
+            caption: caption,
+            privacy_level: "PUBLIC_TO_EVERYONE",
+          },
+        }),
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`Erro ao publicar: ${data.error?.message || JSON.stringify(data)}`);
+    }
+
+    // TikTok retorna um post_id
+    const postId = data.data?.video_id || data.data?.post_id || "unknown";
+    
+    return {
+      postId,
+      url: `https://www.tiktok.com/@${userId}/video/${postId}`,
+    };
+  } catch (error) {
+    console.error("[TikTok Publish Error]", error);
+    throw new Error(
+      `Erro ao publicar no TikTok: ${error instanceof Error ? error.message : "Desconhecido"}`
+    );
+  }
+}
+
 export const socialPublishingRouter = router({
   // Publicar post em múltiplas plataformas
   publish: protectedProcedure
@@ -116,8 +213,66 @@ export const socialPublishingRouter = router({
                 instagramAccountId
               );
             }
+          } else if (platform === "facebook") {
+            // Implementação real do Facebook
+            const accessToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN;
+            const pageId = process.env.FACEBOOK_PAGE_ID;
+
+            if (!accessToken || !pageId) {
+              // Se não tiver no .env, tentar buscar das conexões do banco
+              const connections = await db.getUserSocialConnections(ctx.user.id);
+              const conn = connections.find(c => c.platform === "facebook");
+              
+              if (!conn || !conn.accessToken || !conn.accountId) {
+                throw new Error("Conta do Facebook não conectada corretamente.");
+              }
+              
+              publishResult = await publishToFacebook(
+                input.caption,
+                input.imageUrl,
+                conn.accessToken,
+                conn.accountId
+              );
+            } else {
+              // Usar credenciais do .env
+              publishResult = await publishToFacebook(
+                input.caption,
+                input.imageUrl,
+                accessToken,
+                pageId
+              );
+            }
+          } else if (platform === "tiktok") {
+            // Implementação real do TikTok
+            const accessToken = process.env.TIKTOK_ACCESS_TOKEN;
+            const userId = process.env.TIKTOK_USER_ID;
+
+            if (!accessToken || !userId) {
+              // Se não tiver no .env, tentar buscar das conexões do banco
+              const connections = await db.getUserSocialConnections(ctx.user.id);
+              const conn = connections.find(c => c.platform === "tiktok");
+              
+              if (!conn || !conn.accessToken || !conn.accountId) {
+                throw new Error("Conta do TikTok não conectada corretamente.");
+              }
+              
+              publishResult = await publishToTikTok(
+                input.caption,
+                input.imageUrl,
+                conn.accessToken,
+                conn.accountId
+              );
+            } else {
+              // Usar credenciais do .env
+              publishResult = await publishToTikTok(
+                input.caption,
+                input.imageUrl,
+                accessToken,
+                userId
+              );
+            }
           } else {
-            throw new Error(`Plataforma ${platform} ainda em fase de implementação real.`);
+            throw new Error(`Plataforma ${platform} não suportada.`);
           }
 
           results[platform] = {
@@ -129,18 +284,28 @@ export const socialPublishingRouter = router({
           // Salvar no banco de dados
           await db.createScheduledPost({
             userId: ctx.user.id,
-            platform,
+            platform: platform as any,
             caption: input.caption,
             status: "published",
             publishedAt: new Date(),
             scheduledFor: new Date(),
             createdAt: new Date(),
           });
+
+          // Atualizar ID do post na plataforma
+          await db.updateScheduledPostPlatformId(
+            (await db.getUserScheduledPosts(ctx.user.id))[0]?.id || 0,
+            platform as any,
+            publishResult.postId
+          );
+
+          console.log(`[${platform.toUpperCase()}] Post publicado com sucesso: ${publishResult.postId}`);
         } catch (error) {
           results[platform] = {
             success: false,
             error: error instanceof Error ? error.message : "Erro desconhecido",
           };
+          console.error(`[${platform.toUpperCase()}] Erro na publicação:`, error);
         }
       }
 
@@ -164,7 +329,7 @@ export const socialPublishingRouter = router({
       for (const platform of input.platforms) {
         await db.createScheduledPost({
           userId: ctx.user.id,
-          platform,
+          platform: platform as any,
           caption: input.caption,
           status: "scheduled",
           scheduledFor: input.scheduledFor,
@@ -186,4 +351,24 @@ export const socialPublishingRouter = router({
       posts: posts.filter(p => p.status === "scheduled"),
     };
   }),
+
+  // Obter posts publicados
+  getPublished: protectedProcedure.query(async ({ ctx }) => {
+    const posts = await db.getPublishedPosts(ctx.user.id);
+    return {
+      success: true,
+      posts,
+    };
+  }),
+
+  // Cancelar post agendado
+  cancelScheduled: protectedProcedure
+    .input(z.object({ postId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await db.updatePostStatus(input.postId, ctx.user.id, "cancelled");
+      return {
+        success: true,
+        message: "Post cancelado com sucesso",
+      };
+    }),
 });

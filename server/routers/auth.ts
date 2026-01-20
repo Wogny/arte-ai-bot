@@ -84,6 +84,17 @@ export const authRouter = router({
           emailVerified: false, // Por padrão, email não verificado
         });
 
+        // Gerar token de verificação de email
+        const verificationToken = generateToken();
+        const user = await db.getUserByEmail(input.email);
+        if (user) {
+          await db.saveEmailVerificationToken(user.id, verificationToken);
+          // Enviar email de verificação
+          const verificationUrl = `${process.env.VITE_APP_URL}/verify-email?token=${verificationToken}`;
+          console.log(`[AUTH] Link de Verificação de Email para ${input.email}: ${verificationUrl}`);
+          // TODO: Implementar envio de email real
+        }
+
         return {
           success: true,
           message: "Usuário criado com sucesso! Verifique seu email para ativar sua conta.",
@@ -124,14 +135,13 @@ export const authRouter = router({
         });
       }
 
-      // TODO: Implementar sistema de verificação de email
-      // Por enquanto, permitir login sem verificação para MVP
-      // if (!user.emailVerified) {
-      //   throw new TRPCError({
-      //     code: "FORBIDDEN",
-      //     message: "Email não verificado. Verifique seu email para continuar.",
-      //   });
-      // }
+      // Implementar sistema de verificação de email
+      if (!user.emailVerified) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Email não verificado. Verifique seu email para continuar.",
+        });
+      }
 
       // Gerar token de sessão
       const sessionToken = await sdk.createSessionToken(user.openId, {
@@ -177,11 +187,13 @@ export const authRouter = router({
       // Gerar token de reset
       const resetToken = generateToken();
 
-      // TODO: Salvar token no banco de dados
-      // await db.savePasswordResetToken(user.id, resetToken);
+      // Salvar token no banco de dados
+      await db.savePasswordResetToken(user.id, resetToken);
 
-      // TODO: Enviar email com link de reset
-      // const resetUrl = `${process.env.VITE_APP_URL}/reset-password?token=${resetToken}`;
+      // Enviar email com link de reset
+      const resetUrl = `${process.env.VITE_APP_URL}/reset-password?token=${resetToken}`;
+      console.log(`[AUTH] Link de Reset de Senha para ${user.email}: ${resetUrl}`);
+      // TODO: Implementar envio de email real
 
       return {
         success: true,
@@ -198,8 +210,17 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      // TODO: Verificar token no banco de dados
-      // const result = await verifyResetToken(input.token);
+      // Verificar token no banco de dados
+      const result = await db.verifyResetToken(input.token);
+      if (!result) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Token inválido ou expirado" });
+      }
+      // Hash da nova senha
+      const passwordHash = hashPassword(input.newPassword);
+      // Atualizar senha do usuário
+      await db.updateUserPassword(result.userId, passwordHash);
+      // Invalidar token
+      await db.invalidateResetToken(input.token);
 
       return {
         success: true,
@@ -211,8 +232,15 @@ export const authRouter = router({
   verifyEmail: publicProcedure
     .input(z.object({ token: z.string() }))
     .mutation(async ({ input }) => {
-      // TODO: Verificar token no banco de dados
-      // const result = await verifyEmailToken(input.token);
+      // Verificar token no banco de dados
+      const result = await db.verifyEmailToken(input.token);
+      if (!result) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Token de verificação inválido ou expirado" });
+      }
+      // Marcar email como verificado
+      await db.verifyUserEmail(result.userId);
+      // Invalidar token
+      await db.invalidateEmailToken(input.token);
 
       return {
         success: true,

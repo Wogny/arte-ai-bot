@@ -5,9 +5,15 @@ import mysql from "mysql2/promise";
 import { 
   InsertUser, 
   users,
+  passwordResetTokens,
+  emailVerificationTokens,
   metaCredentials,
   InsertMetaCredential,
   MetaCredential,
+  PasswordResetToken,
+  InsertPasswordResetToken,
+  EmailVerificationToken,
+  InsertEmailVerificationToken,
   projects,
   InsertProject,
   Project,
@@ -189,6 +195,108 @@ export async function getUserByEmail(email: string) {
 
   const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+// ============ AUTHENTICATION TOKENS OPERATIONS ============
+
+export async function updateUserPassword(userId: number, passwordHash: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(users)
+    .set({ passwordHash, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+export async function verifyUserEmail(userId: number): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(users)
+    .set({ emailVerified: true, updatedAt: new Date() })
+    .where(eq(users.id, userId));
+}
+
+// --- Password Reset Tokens ---
+
+export async function savePasswordResetToken(userId: number, token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hora de validade
+
+  await db.insert(passwordResetTokens).values({
+    userId,
+    token,
+    expiresAt,
+  });
+}
+
+export async function verifyResetToken(token: string): Promise<{ userId: number } | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [result] = await db.select({ userId: passwordResetTokens.userId })
+    .from(passwordResetTokens)
+    .where(and(
+      eq(passwordResetTokens.token, token),
+      sql`${passwordResetTokens.expiresAt} > NOW()`,
+      eq(passwordResetTokens.usedAt, null)
+    ));
+
+  if (!result) return null;
+
+  return result;
+}
+
+export async function invalidateResetToken(token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(passwordResetTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(passwordResetTokens.token, token));
+}
+
+// --- Email Verification Tokens ---
+
+export async function saveEmailVerificationToken(userId: number, token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de validade
+
+  await db.insert(emailVerificationTokens).values({
+    userId,
+    token,
+    expiresAt,
+  });
+}
+
+export async function verifyEmailToken(token: string): Promise<{ userId: number } | null> {
+  const db = await getDb();
+  if (!db) return null;
+
+  const [result] = await db.select({ userId: emailVerificationTokens.userId })
+    .from(emailVerificationTokens)
+    .where(and(
+      eq(emailVerificationTokens.token, token),
+      sql`${emailVerificationTokens.expiresAt} > NOW()`,
+      eq(emailVerificationTokens.usedAt, null)
+    ));
+
+  if (!result) return null;
+
+  return result;
+}
+
+export async function invalidateEmailToken(token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  await db.update(emailVerificationTokens)
+    .set({ usedAt: new Date() })
+    .where(eq(emailVerificationTokens.token, token));
 }
 
 // ============ META CREDENTIALS OPERATIONS ============
