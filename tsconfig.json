@@ -11,8 +11,8 @@
     "jsx": "preserve",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "allowImportingTsExtensions": true,
-    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "moduleResolution": "Bundler",
     "baseUrl": ".",
     "types": ["node", "vite/client"],
     "paths": {
