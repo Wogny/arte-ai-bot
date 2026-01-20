@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import * as db from "../db.js";
 import { nanoid } from "nanoid";
 import { storagePut } from "../storage.js";
+import { invokeLLM } from "../_core/llm.js";
 
 // Validação de entrada
 const generateImageInputSchema = z.object({
@@ -84,7 +85,32 @@ async function generateImageWithStableDiffusion(
     realistic: "photorealistic, 4k, professional photography",
   };
 
-  const enhancedPrompt = `${prompt}, ${stylePrompts[style] || style}`;
+  // Traduzir prompt para inglês se necessário
+  let translatedPrompt = prompt;
+  try {
+    console.log("[Image Generation] Traduzindo prompt para inglês...");
+    const translationResponse = await invokeLLM({
+      messages: [
+        {
+          role: "system",
+          content: "You are a professional translator. Translate the user's image prompt to English. Return ONLY the translated text, no explanations.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+    const content = translationResponse.choices[0]?.message.content;
+    if (typeof content === "string" && content.trim().length > 0) {
+      translatedPrompt = content.trim();
+      console.log(`[Image Generation] Prompt traduzido: ${translatedPrompt}`);
+    }
+  } catch (error) {
+    console.error("[Image Generation] Erro na tradução, usando prompt original:", error);
+  }
+
+  const enhancedPrompt = `${translatedPrompt}, ${stylePrompts[style] || style}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -126,11 +152,20 @@ async function generateImageWithStableDiffusion(
     // Converter base64 para buffer
     const imageBuffer = Buffer.from(data.artifacts[0].base64, "base64");
     
-    // Fazer upload para S3
+    // Fazer upload para S3 com fallback para base64
     const imageKey = `generated-images/${nanoid()}.png`;
-    console.log("[Image Generation] Fazendo upload da imagem para S3...");
-    const { url: imageUrl } = await storagePut(imageKey, imageBuffer, "image/png");
-    console.log("[Image Generation] Upload concluído. URL:", imageUrl);
+    let imageUrl = `data:image/png;base64,${data.artifacts[0].base64}`;
+    
+    try {
+      console.log("[Image Generation] Tentando upload para S3...");
+      const storageResult = await storagePut(imageKey, imageBuffer, "image/png");
+      imageUrl = storageResult.url;
+      console.log("[Image Generation] Upload S3 concluído. URL:", imageUrl);
+    } catch (storageError) {
+      console.warn("[Image Generation] Falha no upload S3, usando base64 como fallback:", storageError instanceof Error ? storageError.message : storageError);
+      // Se o base64 for muito grande para o banco, vamos tentar reduzir a qualidade/tamanho no futuro
+      // Por enquanto, o base64 original será usado
+    }
     
     return { imageUrl, imageKey };
   } catch (error) {
