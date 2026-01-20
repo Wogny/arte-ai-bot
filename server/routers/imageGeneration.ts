@@ -85,32 +85,9 @@ async function generateImageWithStableDiffusion(
     realistic: "photorealistic, 4k, professional photography",
   };
 
-  // Traduzir prompt para inglês se necessário
-  let translatedPrompt = prompt;
-  try {
-    console.log("[Image Generation] Traduzindo prompt para inglês...");
-    const translationResponse = await invokeLLM({
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional translator. Translate the user's image prompt to English. Return ONLY the translated text, no explanations.",
-        },
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
-    const content = translationResponse.choices[0]?.message.content;
-    if (typeof content === "string" && content.trim().length > 0) {
-      translatedPrompt = content.trim();
-      console.log(`[Image Generation] Prompt traduzido: ${translatedPrompt}`);
-    }
-  } catch (error) {
-    console.error("[Image Generation] Erro na tradução, usando prompt original:", error);
-  }
-
-  const enhancedPrompt = `${translatedPrompt}, ${stylePrompts[style] || style}`;
+  // Prompt original (Stability AI prefere inglês, mas aceita outros idiomas com menor precisão)
+  // Removida tradução via LLM para evitar erros de conexão no Vercel
+  const enhancedPrompt = `${prompt}, ${stylePrompts[style] || style}`;
 
   try {
     const response = await fetch(apiUrl, {
