@@ -16,7 +16,7 @@ router.get("/:id", async (req, res) => {
     if (!dbInstance) return res.status(500).send("Erro ao conectar ao banco");
 
     // Buscar imagem no banco sem filtro de usuário para garantir que apareça no teste
-    const image = await dbInstance.select().from(db.generatedImages).where(sql`id = ${imageId}`).limit(1);
+    const image = await dbInstance.select().from(db.generatedImages).where(db.sql`id = ${imageId}`).limit(1);
     const imageData = image[0];
     
     if (!imageData || !imageData.imageUrl) {
