@@ -11,12 +11,9 @@ router.get("/:id", async (req, res) => {
       return res.status(400).send("ID de imagem inválido");
     }
 
-    // Buscar imagem no banco (usando uma query direta para ser mais rápido)
-    const dbInstance = await db.getDb();
-    if (!dbInstance) return res.status(500).send("Erro ao conectar ao banco");
-
     // Buscar imagem usando SQL puro para evitar erros de compatibilidade do Drizzle no Vercel
-    const [rows] = await db.pool.execute("SELECT imageUrl FROM generated_images WHERE id = ? LIMIT 1", [imageId]);
+    const pool = db.getPool();
+    const [rows] = await pool.execute("SELECT imageUrl FROM generated_images WHERE id = ? LIMIT 1", [imageId]);
     const imageData = (rows as any[])[0];
     
     if (!imageData || !imageData.imageUrl) {

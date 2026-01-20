@@ -70,22 +70,29 @@ import {
 import { ENV } from './_core/env.js';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _pool: mysql.Pool | null = null;
+
+export function getPool() {
+  if (!_pool) {
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) {
+      throw new Error("[Database] DATABASE_URL is not defined");
+    }
+    _pool = mysql.createPool(dbUrl);
+  }
+  return _pool;
+}
 
 export async function getDb() {
   if (!_db) {
-    const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl) {
-      console.error("[Database] DATABASE_URL is not defined");
-      return null;
-    }
     try {
-      const connection = await mysql.createConnection(dbUrl);
-      _db = drizzle(connection);
+      const pool = getPool();
+      _db = drizzle(pool);
       console.log("[Database] Connected successfully with mysql2 client");
     } catch (error) {
       console.error("[Database] Failed to connect:", error);
       _db = null;
-      throw error; // Propagar o erro para ser capturado pelo tRPC
+      throw error;
     }
   }
   return _db;
