@@ -126,8 +126,19 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      console.log(`[Auth] Login attempt for email: ${input.email}`);
       const user = await db.getUserByEmail(input.email);
-      if (!user || !user.passwordHash) {
+      
+      if (!user) {
+        console.log(`[Auth] User not found for email: ${input.email}`);
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Email ou senha inválidos",
+        });
+      }
+
+      if (!user.passwordHash) {
+        console.log(`[Auth] User has no password hash: ${input.email}`);
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha inválidos",
@@ -135,7 +146,10 @@ export const authRouter = router({
       }
 
       // Verificar senha
-      if (!verifyPassword(input.password, user.passwordHash)) {
+      const isPasswordCorrect = verifyPassword(input.password, user.passwordHash);
+      console.log(`[Auth] Password check for ${input.email}: ${isPasswordCorrect ? "SUCCESS" : "FAILED"}`);
+      
+      if (!isPasswordCorrect) {
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha inválidos",
@@ -143,6 +157,7 @@ export const authRouter = router({
       }
 
       // Implementar sistema de verificação de email
+      console.log(`[Auth] Email verification status for ${input.email}: ${user.emailVerified}`);
       if (!user.emailVerified) {
         throw new TRPCError({
           code: "FORBIDDEN",
