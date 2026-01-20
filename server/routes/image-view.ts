@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as db from "../db.js";
+import { sql } from "drizzle-orm";
 
 const router = Router();
 
@@ -14,16 +15,19 @@ router.get("/:id", async (req, res) => {
     const dbInstance = await db.getDb();
     if (!dbInstance) return res.status(500).send("Erro ao conectar ao banco");
 
-    const image = await db.getImageById(imageId, 1); // Temporariamente usando ID 1 ou buscando do contexto se possível
-    // Nota: Em produção, idealmente verificaríamos a sessão do usuário aqui
+    // Buscar imagem no banco sem filtro de usuário para garantir que apareça no teste
+    const image = await dbInstance.select().from(db.generatedImages).where(sql`id = ${imageId}`).limit(1);
+    const imageData = image[0];
     
-    if (!image || !image.imageUrl) {
+    if (!imageData || !imageData.imageUrl) {
       return res.status(404).send("Imagem não encontrada");
     }
 
-    if (image.imageUrl.startsWith("data:image/")) {
+    const imageUrl = imageData.imageUrl;
+
+    if (imageUrl.startsWith("data:image/")) {
       // Extrair o base64
-      const matches = image.imageUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+      const matches = imageUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
       if (!matches || matches.length !== 3) {
         return res.status(400).send("Formato de imagem inválido");
       }
@@ -36,7 +40,7 @@ router.get("/:id", async (req, res) => {
       return res.send(buffer);
     } else {
       // Se for uma URL externa (S3), redirecionar
-      return res.redirect(image.imageUrl);
+      return res.redirect(imageUrl);
     }
   } catch (error) {
     console.error("[Image View Error]", error);

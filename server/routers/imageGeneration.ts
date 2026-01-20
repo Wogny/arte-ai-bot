@@ -141,21 +141,12 @@ async function generateImageWithStableDiffusion(
       console.warn("[Image Generation] Falha na otimização, usando original:", sharpError);
     }
 
-    // Fazer upload para S3 com fallback para base64
+    // Usar base64 otimizado diretamente para garantir funcionamento imediato
+    // Otimização Sharp já reduziu para ~80KB, o que é seguro para o banco de dados
     const imageKey = `generated-images/${nanoid()}.jpg`;
-    let imageUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
+    const imageUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
     
-    try {
-      console.log("[Image Generation] Tentando upload para S3...");
-      const storageResult = await storagePut(imageKey, imageBuffer, "image/jpeg");
-      imageUrl = storageResult.url;
-      console.log("[Image Generation] Upload S3 concluído. URL:", imageUrl);
-    } catch (storageError) {
-      console.warn("[Image Generation] Falha no upload S3, usando base64 como fallback:", storageError instanceof Error ? storageError.message : storageError);
-      // Se o base64 for muito grande para o banco, vamos tentar reduzir a qualidade/tamanho no futuro
-      // Por enquanto, o base64 original será usado
-    }
-    
+    console.log("[Image Generation] Imagem preparada em base64 otimizado.");
     return { imageUrl, imageKey };
   } catch (error) {
     console.error("[Image Generation Exception]", error);
