@@ -6,6 +6,7 @@ import * as db from "../db.js";
 import { nanoid } from "nanoid";
 import { storagePut } from "../storage.js";
 import { invokeLLM } from "../_core/llm.js";
+import sharp from "sharp";
 
 // Validação de entrada
 const generateImageInputSchema = z.object({
@@ -127,15 +128,26 @@ async function generateImageWithStableDiffusion(
     console.log("[Image Generation] Imagem gerada com sucesso pela Stability AI.");
     
     // Converter base64 para buffer
-    const imageBuffer = Buffer.from(data.artifacts[0].base64, "base64");
+    let imageBuffer = Buffer.from(data.artifacts[0].base64, "base64");
     
+    // Otimizar imagem para reduzir tamanho (especialmente importante para o fallback base64)
+    try {
+      console.log("[Image Generation] Otimizando imagem...");
+      imageBuffer = await sharp(imageBuffer)
+        .jpeg({ quality: 80 }) // Converter para JPEG 80% para reduzir drasticamente o tamanho
+        .toBuffer();
+      console.log(`[Image Generation] Otimização concluída. Novo tamanho: ${(imageBuffer.length / 1024).toFixed(2)} KB`);
+    } catch (sharpError) {
+      console.warn("[Image Generation] Falha na otimização, usando original:", sharpError);
+    }
+
     // Fazer upload para S3 com fallback para base64
-    const imageKey = `generated-images/${nanoid()}.png`;
-    let imageUrl = `data:image/png;base64,${data.artifacts[0].base64}`;
+    const imageKey = `generated-images/${nanoid()}.jpg`;
+    let imageUrl = `data:image/jpeg;base64,${imageBuffer.toString("base64")}`;
     
     try {
       console.log("[Image Generation] Tentando upload para S3...");
-      const storageResult = await storagePut(imageKey, imageBuffer, "image/png");
+      const storageResult = await storagePut(imageKey, imageBuffer, "image/jpeg");
       imageUrl = storageResult.url;
       console.log("[Image Generation] Upload S3 concluído. URL:", imageUrl);
     } catch (storageError) {

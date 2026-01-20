@@ -1,4 +1,11 @@
 import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, primaryKey, index, customType } from "drizzle-orm/mysql-core";
+
+// Custom type for LONGTEXT in MySQL
+const longtext = customType<{ data: string }>({
+  dataType() {
+    return "longtext";
+  },
+});
 import { sql } from "drizzle-orm";
 
 /**
@@ -153,7 +160,7 @@ export const generatedImages = mysqlTable("generated_images", {
   prompt: text("prompt").notNull(),
   visualStyle: varchar("visualStyle", { length: 100 }).notNull(),
   contentType: varchar("contentType", { length: 100 }).notNull(),
-  imageUrl: text("imageUrl").notNull(),
+  imageUrl: longtext("imageUrl").notNull(),
   imageKey: varchar("imageKey", { length: 500 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
