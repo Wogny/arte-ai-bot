@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, primaryKey, index } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean, json, primaryKey, index, customType } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
 /**
@@ -153,7 +153,11 @@ export const generatedImages = mysqlTable("generated_images", {
   prompt: text("prompt").notNull(),
   visualStyle: varchar("visualStyle", { length: 100 }).notNull(),
   contentType: varchar("contentType", { length: 100 }).notNull(),
-  imageUrl: sql`longtext`.as<string>().notNull(),
+  imageUrl: customType<{ data: string }>({
+    dataType() {
+      return "longtext";
+    },
+  })("imageUrl").notNull(),
   imageKey: varchar("imageKey", { length: 500 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
