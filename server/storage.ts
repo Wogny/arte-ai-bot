@@ -11,7 +11,7 @@ function getStorageConfig(): StorageConfig {
 
   if (!baseUrl || !apiKey) {
     throw new Error(
-      "Storage proxy credentials missing: set BUILT_IN_FORGE_API_URL and BUILT_IN_FORGE_API_KEY"
+      "Credenciais de Storage ausentes. Por favor, configure STORAGE_API_URL e STORAGE_API_KEY no seu ambiente (Vercel)."
     );
   }
 

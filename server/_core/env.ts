@@ -6,8 +6,8 @@ export const ENV = {
   oAuthServerUrl: process.env.OAUTH_SERVER_URL ?? "",
   ownerOpenId: process.env.OWNER_OPEN_ID ?? "",
   isProduction: process.env.NODE_ENV === "production",
-  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? "",
-  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? "",
+  forgeApiUrl: process.env.BUILT_IN_FORGE_API_URL ?? process.env.STORAGE_API_URL ?? "",
+  forgeApiKey: process.env.BUILT_IN_FORGE_API_KEY ?? process.env.STORAGE_API_KEY ?? "",
   // Security
   ENCRYPTION_KEY: process.env.ENCRYPTION_KEY ?? process.env.JWT_SECRET ?? "default-encryption-key-change-in-production",
   // WhatsApp
