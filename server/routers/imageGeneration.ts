@@ -13,7 +13,7 @@ const generateImageInputSchema = z.object({
   height: z.number().int().min(256).max(2048).default(1024),
   steps: z.number().int().min(20).max(100).default(50),
   guidance_scale: z.number().min(1).max(20).default(7.5),
-  projectId: z.number().optional(),
+  projectId: z.union([z.number(), z.string(), z.null()]).optional(),
   contentType: z.string().default("post"),
 });
 
@@ -144,7 +144,7 @@ export const imageGenerationRouter = router({
 
         const generatedImage = await db.saveGeneratedImage({
           userId: ctx.user.id,
-          projectId: input.projectId ?? null,
+          projectId: (input.projectId && !isNaN(Number(input.projectId))) ? Number(input.projectId) : null,
           prompt: input.prompt,
           visualStyle: input.style,
           imageUrl,
@@ -169,13 +169,14 @@ export const imageGenerationRouter = router({
   list: protectedProcedure
     .input(
       z.object({
-        projectId: z.number().optional(),
+        projectId: z.union([z.number(), z.string(), z.null()]).optional(),
         limit: z.number().default(20),
         offset: z.number().default(0),
       })
     )
     .query(async ({ ctx, input }) => {
-      return await db.getUserImages(ctx.user.id, input.projectId);
+      const projectId = (input.projectId && !isNaN(Number(input.projectId))) ? Number(input.projectId) : undefined;
+      return await db.getUserImages(ctx.user.id, projectId);
     }),
 
   getById: protectedProcedure

@@ -255,9 +255,18 @@ export async function saveGeneratedImage(image: InsertGeneratedImage): Promise<G
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const result = await db.insert(generatedImages).values(image);
-  const inserted = await db.select().from(generatedImages).where(eq(generatedImages.id, Number(result[0].insertId))).limit(1);
-  return inserted[0]!;
+  try {
+    console.log("[Database] Tentando inserir imagem gerada:", JSON.stringify({
+      ...image,
+      imageUrl: image.imageUrl?.substring(0, 50) + "..."
+    }));
+    const result = await db.insert(generatedImages).values(image);
+    const inserted = await db.select().from(generatedImages).where(eq(generatedImages.id, Number(result[0].insertId))).limit(1);
+    return inserted[0]!;
+  } catch (error) {
+    console.error("[Database] Erro detalhado na inserção de imagem:", error);
+    throw error;
+  }
 }
 
 export async function getUserImages(userId: number, projectId?: number): Promise<GeneratedImage[]> {
