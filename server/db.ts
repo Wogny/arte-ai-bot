@@ -264,13 +264,27 @@ export async function saveEmailVerificationToken(userId: number, token: string):
   const db = await getDb();
   if (!db) return;
 
-  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas de validade
+  // Garante que a data de expiração seja um objeto Date válido
+  const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-  await db.insert(emailVerificationTokens).values({
-    userId,
-    token,
-    expiresAt,
-  });
+  try {
+    // Limpar tokens antigos não usados para este usuário antes de criar um novo
+    await db.delete(emailVerificationTokens).where(
+      and(
+        eq(emailVerificationTokens.userId, userId),
+        eq(emailVerificationTokens.usedAt, null)
+      )
+    );
+
+    await db.insert(emailVerificationTokens).values({
+      userId,
+      token,
+      expiresAt,
+    });
+  } catch (error) {
+    console.error("[Database] Erro ao salvar token de verificação:", error);
+    throw error;
+  }
 }
 
 export async function verifyEmailToken(token: string): Promise<{ userId: number } | null> {
