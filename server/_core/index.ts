@@ -9,6 +9,7 @@ import { createContext } from "./context.js";
 import { serveStatic, setupVite } from "./vite.js";
 import { mercadopagoWebhookRouter } from "../routes/mercadopago-webhook.js";
 import cookieParser from "cookie-parser";
+import { errorHandler, notFoundHandler } from "../middleware/errorHandler.js";
 
 const app = express();
 app.use(cookieParser());
@@ -32,6 +33,10 @@ app.use(
     createContext,
   })
 );
+
+// Error handling middleware (deve ser o último)
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 // Export app for Vercel
 export default app;

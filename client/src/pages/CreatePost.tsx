@@ -129,15 +129,15 @@ export default function CreatePost() {
   const selectedImage = generatedImages.find(img => img.id === selectedImageId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 sm:p-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2 flex items-center gap-2">
-            <Sparkles className="w-8 h-8 text-purple-400" />
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-2 flex items-center gap-2">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
             Criar Post com IA
           </h1>
-          <p className="text-gray-400">Gere imagens incríveis e publique em suas redes sociais</p>
+          <p className="text-sm sm:text-base text-gray-400">Gere imagens incríveis e publique em suas redes sociais</p>
         </div>
 
         {/* Error Message */}
@@ -147,7 +147,7 @@ export default function CreatePost() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Left Panel - Generator */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Generator Card */}
@@ -170,7 +170,7 @@ export default function CreatePost() {
               {/* Style Selector */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-200 mb-2">Estilo</label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {styles.map(style => (
                     <button
                       key={style.value}
@@ -228,7 +228,7 @@ export default function CreatePost() {
             <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6">
               <h2 className="text-xl font-semibold text-white mb-4">Plataformas</h2>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 {platforms.map(platform => (
                   <button
                     key={platform.id}
