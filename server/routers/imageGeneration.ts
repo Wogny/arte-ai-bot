@@ -9,10 +9,10 @@ import { nanoid } from "nanoid";
 const generateImageInputSchema = z.object({
   prompt: z.string().min(3, "Prompt deve ter no mínimo 3 caracteres"),
   style: z.string().default("realistic"),
-  width: z.number().int().min(256).max(2048).default(1024),
-  height: z.number().int().min(256).max(2048).default(1024),
-  steps: z.number().int().min(20).max(100).default(50),
-  guidance_scale: z.number().min(1).max(20).default(7.5),
+  width: z.union([z.number(), z.string()]).transform(v => Number(v)).default(1024),
+  height: z.union([z.number(), z.string()]).transform(v => Number(v)).default(1024),
+  steps: z.union([z.number(), z.string()]).transform(v => Number(v)).default(50),
+  guidance_scale: z.union([z.number(), z.string()]).transform(v => Number(v)).default(7.5),
   projectId: z.union([z.number(), z.string(), z.null()]).optional(),
   contentType: z.string().default("post"),
 });
