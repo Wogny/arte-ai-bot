@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { eq, and, desc, sql, inArray } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 import { 
   InsertUser, 
   users,
@@ -78,8 +79,9 @@ export async function getDb() {
       return null;
     }
     try {
-      _db = drizzle(dbUrl);
-      console.log("[Database] Connected successfully");
+      const connection = await mysql.createConnection(dbUrl);
+      _db = drizzle(connection);
+      console.log("[Database] Connected successfully with mysql2 client");
     } catch (error) {
       console.error("[Database] Failed to connect:", error);
       _db = null;

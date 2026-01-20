@@ -153,11 +153,7 @@ export const generatedImages = mysqlTable("generated_images", {
   prompt: text("prompt").notNull(),
   visualStyle: varchar("visualStyle", { length: 100 }).notNull(),
   contentType: varchar("contentType", { length: 100 }).notNull(),
-  imageUrl: customType<{ data: string }>({
-    dataType() {
-      return "longtext";
-    },
-  })("imageUrl").notNull(),
+  imageUrl: text("imageUrl").notNull(),
   imageKey: varchar("imageKey", { length: 500 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
