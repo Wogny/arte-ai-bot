@@ -347,7 +347,7 @@ export default function Dashboard() {
 
     // Usar imagens reais
     return images.slice(0, 3).map(img => ({
-      image: img.imageUrl || "",
+      image: img.imageUrl?.startsWith('data:') ? `/api/images/view/${img.id}` : (img.imageUrl || ""),
       title: img.prompt?.slice(0, 40) + (img.prompt && img.prompt.length > 40 ? "..." : "") || "Post sem título",
       platforms: ["Instagram", "TikTok"],
       description: img.prompt || "",

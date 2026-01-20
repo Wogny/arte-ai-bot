@@ -6,6 +6,7 @@ import { registerOAuthRoutes } from "./_core/oauth.js";
 import { appRouter } from "./routers.js";
 import { createContext } from "./_core/context.js";
 import { mercadopagoWebhookRouter } from "./routes/mercadopago-webhook.js";
+import { imageViewRouter } from "./routes/image-view.js";
 
 const app = express();
 
@@ -27,6 +28,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Webhook do Mercado Pago
 app.use("/api/mercadopago/webhook", mercadopagoWebhookRouter);
+
+// Rota de visualização de imagem
+app.use("/api/images/view", imageViewRouter);
 
 // OAuth callback
 registerOAuthRoutes(app);
