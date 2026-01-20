@@ -5,6 +5,7 @@ import * as db from "../db.js";
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import { sdk } from "../_core/sdk.js";
 import crypto from "crypto";
+import { sendEmail, getVerificationEmailTemplate, getPasswordResetEmailTemplate } from "../services/email.js";
 
 // Validação de email
 const emailSchema = z.string().email("Email inválido");
@@ -91,8 +92,14 @@ export const authRouter = router({
           await db.saveEmailVerificationToken(user.id, verificationToken);
           // Enviar email de verificação
           const verificationUrl = `${process.env.VITE_APP_URL}/verify-email?token=${verificationToken}`;
-          console.log(`[AUTH] Link de Verificação de Email para ${input.email}: ${verificationUrl}`);
-          // TODO: Implementar envio de email real
+          
+          await sendEmail({
+            to: input.email,
+            subject: "Verifique seu email - MKT Gerenciador",
+            html: getVerificationEmailTemplate(input.name, verificationUrl),
+          });
+          
+          console.log(`[AUTH] Link de Verificação de Email enviado para ${input.email}`);
         }
 
         return {
@@ -192,8 +199,14 @@ export const authRouter = router({
 
       // Enviar email com link de reset
       const resetUrl = `${process.env.VITE_APP_URL}/reset-password?token=${resetToken}`;
-      console.log(`[AUTH] Link de Reset de Senha para ${user.email}: ${resetUrl}`);
-      // TODO: Implementar envio de email real
+      
+      await sendEmail({
+        to: user.email!,
+        subject: "Recuperação de Senha - MKT Gerenciador",
+        html: getPasswordResetEmailTemplate(user.name || "Usuário", resetUrl),
+      });
+
+      console.log(`[AUTH] Link de Reset de Senha enviado para ${user.email}`);
 
       return {
         success: true,
@@ -245,6 +258,40 @@ export const authRouter = router({
       return {
         success: true,
         message: "Email verificado com sucesso!",
+      };
+    }),
+
+  // Reenviar email de verificação
+  resendVerificationEmail: publicProcedure
+    .input(z.object({ email: emailSchema }))
+    .mutation(async ({ input }) => {
+      const user = await db.getUserByEmail(input.email);
+      
+      if (!user) {
+        // Por segurança, não confirmamos se o email existe
+        return { success: true, message: "Se o email estiver cadastrado e não verificado, você receberá um novo link." };
+      }
+
+      if (user.emailVerified) {
+        return { success: true, message: "Este email já está verificado." };
+      }
+
+      // Gerar novo token
+      const verificationToken = generateToken();
+      await db.saveEmailVerificationToken(user.id, verificationToken);
+
+      // Enviar email
+      const verificationUrl = `${process.env.VITE_APP_URL}/verify-email?token=${verificationToken}`;
+      
+      await sendEmail({
+        to: user.email!,
+        subject: "Verifique seu email - MKT Gerenciador",
+        html: getVerificationEmailTemplate(user.name || "Usuário", verificationUrl),
+      });
+
+      return {
+        success: true,
+        message: "Um novo link de verificação foi enviado para seu email.",
       };
     }),
 });

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { trpc } from '../lib/trpc';
 import { useLocation } from 'wouter';
+import { toast } from 'sonner';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function Login() {
   const [, setLocation] = useLocation();
 
   const loginMutation = trpc.auth.loginWithEmail.useMutation();
+  const resendEmailMutation = trpc.auth.resendVerificationEmail.useMutation();
 
   const utils = trpc.useUtils();
 
@@ -22,23 +24,30 @@ export default function Login() {
 
     try {
       const result = await loginMutation.mutateAsync({ email, password });
-      console.log("[Login] Resultado do login:", result);
       if (result.success) {
-        // Salva uma flag temporária para o AppLayout saber que um login acabou de ocorrer
         localStorage.setItem("manus-runtime-user-info", JSON.stringify(result.user));
-        console.log("[Login] Cache de usuário salvo, invalidando query 'me'...");
-        // Invalida a query 'me' para garantir que o AppLayout reconheça o novo usuário
         await utils.auth.me.invalidate();
-        // Redireciona para o dashboard limpando o histórico de login
-        console.log("[Login] Redirecionando para /dashboard...");
         window.location.replace('/dashboard');
-      } else {
-        setError(result.message || 'Falha ao fazer login');
       }
     } catch (err: any) {
       setError(err.message || 'Erro ao fazer login');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!email) {
+      setError('Digite seu email para reenviar o link');
+      return;
+    }
+
+    try {
+      const result = await resendEmailMutation.mutateAsync({ email });
+      toast.success(result.message);
+      setError('');
+    } catch (err: any) {
+      toast.error(err.message || 'Erro ao reenviar email');
     }
   };
 
@@ -63,6 +72,20 @@ export default function Login() {
           {error && (
             <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
               <p className="text-red-200 text-sm">{error}</p>
+              {error.includes('não verificado') && (
+                <button
+                  onClick={handleResendEmail}
+                  disabled={resendEmailMutation.isPending}
+                  className="mt-2 flex items-center gap-2 text-xs font-semibold text-white hover:text-purple-200 transition"
+                >
+                  {resendEmailMutation.isPending ? (
+                    <RefreshCw className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <Mail className="w-3 h-3" />
+                  )}
+                  Reenviar link de confirmação
+                </button>
+              )}
             </div>
           )}
 
