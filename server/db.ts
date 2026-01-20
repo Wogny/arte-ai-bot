@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { eq, and, desc, sql, inArray } from "drizzle-orm";
+import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
 import { 
@@ -272,7 +272,7 @@ export async function saveEmailVerificationToken(userId: number, token: string):
     await db.delete(emailVerificationTokens).where(
       and(
         eq(emailVerificationTokens.userId, userId),
-        eq(emailVerificationTokens.usedAt, null)
+        isNull(emailVerificationTokens.usedAt)
       )
     );
 
