@@ -4,6 +4,7 @@ import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
 import * as db from "../db.js";
 import { nanoid } from "nanoid";
+import { storagePut } from "../storage.js";
 
 // Validação de entrada
 const generateImageInputSchema = z.object({
@@ -59,7 +60,7 @@ async function generateImageWithStableDiffusion(
   height: number,
   steps: number,
   guidance_scale: number
-): Promise<string> {
+): Promise<{ imageUrl: string; imageKey: string }> {
   const apiKey = process.env.STABLE_DIFFUSION_API_KEY;
   const engineId = "stable-diffusion-xl-1024-v1-0";
   const apiUrl = `https://api.stability.ai/v1/generation/${engineId}/text-to-image`;
@@ -121,7 +122,17 @@ async function generateImageWithStableDiffusion(
     }
 
     console.log("[Image Generation] Imagem gerada com sucesso pela Stability AI.");
-    return `data:image/png;base64,${data.artifacts[0].base64}`;
+    
+    // Converter base64 para buffer
+    const imageBuffer = Buffer.from(data.artifacts[0].base64, "base64");
+    
+    // Fazer upload para S3
+    const imageKey = `generated-images/${nanoid()}.png`;
+    console.log("[Image Generation] Fazendo upload da imagem para S3...");
+    const { url: imageUrl } = await storagePut(imageKey, imageBuffer, "image/png");
+    console.log("[Image Generation] Upload concluído. URL:", imageUrl);
+    
+    return { imageUrl, imageKey };
   } catch (error) {
     console.error("[Image Generation Exception]", error);
     throw error;
@@ -133,7 +144,7 @@ export const imageGenerationRouter = router({
     .input(generateImageInputSchema)
     .mutation(async ({ ctx, input }) => {
       try {
-        const imageUrl = await generateImageWithStableDiffusion(
+        const { imageUrl, imageKey } = await generateImageWithStableDiffusion(
           input.prompt,
           input.style,
           input.width,
@@ -148,7 +159,7 @@ export const imageGenerationRouter = router({
           prompt: input.prompt,
           visualStyle: input.style,
           imageUrl,
-          imageKey: `generated-images/${nanoid()}.png`,
+          imageKey,
           contentType: input.contentType,
         });
 
