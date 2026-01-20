@@ -211,22 +211,22 @@ export default function CreateArt() {
               )}
             </Button>
 
-            {generateMutation.data && (
+            {generateMutation.data?.image && (
               <Card className="border-2 border-primary/20 shadow-lg">
                 <CardHeader>
                   <CardTitle className="text-primary">Arte Gerada!</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <img 
-                    src={generateMutation.data.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.id}` : generateMutation.data.imageUrl} 
+                    src={generateMutation.data.image.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.image.id}` : generateMutation.data.image.imageUrl} 
                     alt="Generated art"
                     className="w-full rounded-lg shadow-md"
                   />
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="flex-1" asChild>
                       <a 
-                        href={generateMutation.data.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.id}` : generateMutation.data.imageUrl} 
-                        download={`arte-${generateMutation.data.id}.jpg`}
+                        href={generateMutation.data.image.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.image.id}` : generateMutation.data.image.imageUrl} 
+                        download={`arte-${generateMutation.data.image.id}.jpg`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
