@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
