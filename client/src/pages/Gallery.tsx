@@ -80,8 +80,8 @@ export default function Gallery() {
                 <CardHeader className="p-0">
                   <div className="aspect-square relative overflow-hidden bg-muted">
                     {(() => {
-                      const src = image.imageUrl;
-                      const isValid = src && (src.startsWith('http') || src.startsWith('data:') || src.startsWith('blob:'));
+                      const src = image.imageUrl?.startsWith('data:') ? `/api/images/view/${image.id}` : (image.imageUrl || "");
+                      const isValid = src && (src.startsWith('http') || src.startsWith('/api/images/view/') || src.startsWith('data:') || src.startsWith('blob:'));
                       if (!isValid) return <div className="w-full h-full flex items-center justify-center bg-muted"><ImageIcon className="w-12 h-12 text-muted-foreground" /></div>;
                       return (
                         <img 
@@ -112,7 +112,12 @@ export default function Gallery() {
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex gap-2">
                   <Button variant="outline" size="sm" className="flex-1" asChild>
-                    <a href={image.imageUrl} download>
+                    <a 
+                      href={image.imageUrl?.startsWith('data:') ? `/api/images/view/${image.id}` : image.imageUrl} 
+                      download={`arte-${image.id}.jpg`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <Download className="w-4 h-4 mr-1" />
                       Baixar
                     </a>

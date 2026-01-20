@@ -48,6 +48,7 @@ export default function CreateArt() {
     onSuccess: (data) => {
       toast.success("Imagem gerada com sucesso!");
       setPrompt("");
+      // Forçar atualização da galeria se necessário
     },
     onError: (error) => {
       toast.error("Erro ao gerar imagem: " + error.message);
@@ -217,13 +218,18 @@ export default function CreateArt() {
                 </CardHeader>
                 <CardContent>
                   <img 
-                    src={generateMutation.data.imageUrl} 
+                    src={generateMutation.data.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.id}` : generateMutation.data.imageUrl} 
                     alt="Generated art"
                     className="w-full rounded-lg shadow-md"
                   />
                   <div className="mt-4 flex gap-2">
                     <Button variant="outline" className="flex-1" asChild>
-                      <a href={generateMutation.data.imageUrl} download>
+                      <a 
+                        href={generateMutation.data.imageUrl?.startsWith('data:') ? `/api/images/view/${generateMutation.data.id}` : generateMutation.data.imageUrl} 
+                        download={`arte-${generateMutation.data.id}.jpg`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         Baixar
                       </a>
                     </Button>
