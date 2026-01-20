@@ -2,7 +2,7 @@ import "dotenv/config";
 import { eq, and, desc, sql, inArray, isNull } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import mysql from "mysql2/promise";
-import nodemailer from "nodemailer";
+// Importação dinâmica será usada dentro da função para garantir inclusão no build do Vercel
 import { 
   InsertUser, 
   users,
@@ -107,16 +107,6 @@ export async function getDb() {
 
 // ============ EMAIL OPERATIONS ============
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: process.env.SMTP_SECURE === "true",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
 interface SendEmailOptions {
   to: string;
   subject: string;
@@ -126,6 +116,19 @@ interface SendEmailOptions {
 
 export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
   try {
+    // Importação dinâmica para forçar o Vercel a incluir o módulo no build da função
+    const nodemailer = await import("nodemailer");
+    
+    const transporter = nodemailer.default.createTransport({
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
+      port: parseInt(process.env.SMTP_PORT || "587"),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
     const info = await transporter.sendMail({
       from: `"${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER}>`,
       to,
@@ -133,6 +136,7 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
       text: text || html.replace(/<[^>]*>?/gm, ""),
       html,
     });
+    
     console.log(`[EmailService] Email enviado para ${to}: ${info.messageId}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
