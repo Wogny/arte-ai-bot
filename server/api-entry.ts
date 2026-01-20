@@ -9,6 +9,15 @@ import { mercadopagoWebhookRouter } from "./routes/mercadopago-webhook.js";
 
 const app = express();
 
+// Content Security Policy to allow base64 images
+app.use((req, res, next) => {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; img-src 'self' data: blob: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https:;"
+  );
+  next();
+});
+
 // Configure cookie parser
 app.use(cookieParser());
 
