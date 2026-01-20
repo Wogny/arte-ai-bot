@@ -143,7 +143,7 @@ export const imageGenerationRouter = router({
 
         const generatedImage = await db.saveGeneratedImage({
           userId: ctx.user.id,
-          projectId: input.projectId || null,
+          projectId: input.projectId ?? null,
           prompt: input.prompt,
           visualStyle: input.style,
           imageUrl,
