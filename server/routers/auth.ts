@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import { sdk } from "../_core/sdk.js";
 import crypto from "crypto";

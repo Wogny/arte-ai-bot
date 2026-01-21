@@ -5,7 +5,7 @@
 
 import { Request, Response, Router } from "express";
 import { eq } from "drizzle-orm";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { whatsappNotificationSettings } from '../../drizzle/schema.js';
 import * as whatsappDb from "./db.js";
 import { whatsappService } from "./service.js";

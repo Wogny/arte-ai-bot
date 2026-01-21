@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { getDb } from "./db.js";
+import { getDb } from "./_core/db.js";
 import { scheduledPosts, platformCredentials, generatedImages } from '../drizzle/schema.js';
 import { eq, and, lte } from "drizzle-orm";
 import { notifyOwner } from "./_core/notification.js";

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { workspaces, workspaceMembers, workspaceInvites, users } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";

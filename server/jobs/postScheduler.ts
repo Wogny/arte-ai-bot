@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 import { notifyOwner } from "../_core/notification.js";
 
 // Status de publicação

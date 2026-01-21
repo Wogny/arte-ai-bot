@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { multiPlatformPosts, campaigns, platformCredentials } from '../../drizzle/schema.js';
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";

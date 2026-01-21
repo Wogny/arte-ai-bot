@@ -10,7 +10,7 @@ import {
   PLATFORM_CONFIGS,
   PlatformType,
 } from "../contentAutomation.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { generatedImages } from '../../drizzle/schema.js';
 import { eq } from "drizzle-orm";
 

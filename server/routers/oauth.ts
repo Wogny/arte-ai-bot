@@ -5,7 +5,7 @@ import {
   FacebookInstagramIntegration,
   WhatsAppIntegration,
 } from "../platformIntegrations.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 

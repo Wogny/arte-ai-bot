@@ -2,7 +2,7 @@ import "dotenv/config";
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 import { nanoid } from "nanoid";
 import { storagePut } from "../storage.js";
 import { invokeLLM } from "../_core/llm.js";

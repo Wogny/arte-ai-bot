@@ -1,5 +1,5 @@
 import axios from "axios";
-import { getDb } from "./db.js";
+import { getDb } from "./_core/db.js";
 import {
   competitors,
   competitorPosts,

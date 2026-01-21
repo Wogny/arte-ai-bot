@@ -1,6 +1,6 @@
 import { router, protectedProcedure } from "../_core/trpc.js";
 import { z } from "zod";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { notifications } from '../../drizzle/schema.js';
 import { desc, eq, and } from "drizzle-orm";
 

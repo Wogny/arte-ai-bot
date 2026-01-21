@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { TRPCError } from "@trpc/server";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 import { apiConfigs } from "../integrations/apis-config.js";
 
 // Validação de entrada

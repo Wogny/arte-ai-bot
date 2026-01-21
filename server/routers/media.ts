@@ -2,7 +2,7 @@ import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { storagePut } from "../storage.js";
 import { nanoid } from "nanoid";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 
 // Tipos de mídia suportados
 const SUPPORTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/webm", "video/avi"];

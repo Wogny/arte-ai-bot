@@ -1,4 +1,4 @@
-import { getDb } from "../db.js";
+import { getDb } from "./db.js";
 import { outgoingWebhooks } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import crypto from "crypto";

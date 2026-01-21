@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 
 // Limites por plano
 export const PLAN_LIMITS = {

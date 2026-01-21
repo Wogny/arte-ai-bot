@@ -1,4 +1,4 @@
-import { getDb } from "../db.js";
+import { getDb } from "./db.js";
 import { auditLogs } from '../../drizzle/schema.js';
 
 interface AuditLogParams {

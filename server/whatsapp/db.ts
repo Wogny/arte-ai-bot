@@ -4,7 +4,7 @@
  */
 
 import { eq, and, desc } from "drizzle-orm";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import {
   whatsappContacts,
   whatsappConversations,

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { encrypt, decrypt } from "../_core/security.js";
 import { protectedProcedure, router } from "../_core/trpc.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";

@@ -1,6 +1,6 @@
 import { protectedProcedure, router } from "../_core/trpc.js";
 import { z } from "zod";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 
 export const tagsRouter = router({
   list: protectedProcedure.query(async ({ ctx }) => {

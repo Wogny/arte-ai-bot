@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { getDb } from "../db.js";
+import { getDb } from "./db.js";
 import { platformCredentials } from '../../drizzle/schema.js';
 import { eq, and } from "drizzle-orm";
 import { decrypt, encrypt } from "./security.js";

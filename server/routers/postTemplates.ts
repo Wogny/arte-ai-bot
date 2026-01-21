@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router, protectedProcedure, publicProcedure } from "../_core/trpc.js";
-import * as db from "../db.js";
+import * as db from "../_core/db.js";
 
 // Categorias de templates
 const categoryOptions = [

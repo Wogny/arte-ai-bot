@@ -32,7 +32,7 @@ import { socialPublishingRouter } from "./routers/socialPublishing.js";
 import { notificationsRouter } from "./routers/notifications.js";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc.js";
 import { z } from "zod";
-import * as db from "./db.js";
+import * as db from "./_core/db.js";
 
 export const appRouter = router({
   system: systemRouter,

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { protectedProcedure, router } from "../_core/trpc.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "../_core/llm.js";
 import {

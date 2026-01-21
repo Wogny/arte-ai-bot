@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { workspaceProcedure } from "../_core/trpc.js";
 import { router } from "../_core/trpc.js";
-import { getDb } from "../db.js";
+import { getDb } from "../_core/db.js";
 import { scheduledPosts, postComments, postVersions, users } from '../../drizzle/schema.js';
 import { eq, and, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";

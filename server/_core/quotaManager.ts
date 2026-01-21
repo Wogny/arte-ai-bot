@@ -1,4 +1,4 @@
-import { getDb } from "../db.js";
+import { getDb } from "./db.js";
 import { subscriptions, scheduledPosts, platformCredentials } from '../../drizzle/schema.js';
 import { eq, and, count, gte } from "drizzle-orm";
 
