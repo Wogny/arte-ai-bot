@@ -352,7 +352,7 @@ export async function verifyResetToken(token: string): Promise<{ userId: number 
     .where(and(
       eq(passwordResetTokens.token, token),
       sql`${passwordResetTokens.expiresAt} > NOW()`,
-      eq(passwordResetTokens.usedAt, null)
+      isNull(passwordResetTokens.usedAt)
     ));
 
   if (!result) return null;
@@ -407,7 +407,7 @@ export async function verifyEmailToken(token: string): Promise<{ userId: number 
     .where(and(
       eq(emailVerificationTokens.token, token),
       sql`${emailVerificationTokens.expiresAt} > NOW()`,
-      eq(emailVerificationTokens.usedAt, null)
+      isNull(emailVerificationTokens.usedAt)
     ));
 
   if (!result) return null;
