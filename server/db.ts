@@ -125,8 +125,14 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
       // Usando axios para compatibilidade total com Node.js no Vercel
       const axios = (await import("axios")).default;
       
+      // No modo de teste (onboarding), o remetente DEVE ser exatamente "onboarding@resend.dev"
+      // Se o usuário já configurou um domínio, ele pode usar o EMAIL_FROM_ADDRESS
+      const fromEmail = process.env.EMAIL_FROM_ADDRESS && process.env.EMAIL_FROM_ADDRESS.includes('@') && !process.env.EMAIL_FROM_ADDRESS.includes('gmail.com')
+        ? `${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"} <${process.env.EMAIL_FROM_ADDRESS}>`
+        : "MKT Gerenciador <onboarding@resend.dev>";
+
       const response = await axios.post("https://api.resend.com/emails", {
-        from: `${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"} <onboarding@resend.dev>`,
+        from: fromEmail,
         to: [to],
         subject: subject,
         html: html,
@@ -134,7 +140,7 @@ export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
       }, {
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${RESEND_API_KEY}`,
+          "Authorization": `Bearer ${RESEND_API_KEY.trim()}`,
         }
       });
 
