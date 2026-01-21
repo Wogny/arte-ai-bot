@@ -5,7 +5,8 @@ import * as db from "../db.js";
 import { COOKIE_NAME, ONE_YEAR_MS } from "../../shared/const.js";
 import { sdk } from "../_core/sdk.js";
 import crypto from "crypto";
-import { sendEmail, getVerificationEmailTemplate, getPasswordResetEmailTemplate } from "../db.js";
+// Removendo a importação duplicada e problemática
+const { sendEmail, getVerificationEmailTemplate, getPasswordResetEmailTemplate } = db;
 
 // Validação de email
 const emailSchema = z.string().email("Email inválido");
