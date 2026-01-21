@@ -124,4 +124,36 @@ export const userRouter = router({
       lastSignedIn: ctx.user?.lastSignedIn,
     };
   }),
+
+  /**
+   * Atualizar senha do usuário
+   */
+  updatePassword: protectedProcedure
+    .input(z.object({
+      newPassword: z.string().min(8, "Senha deve ter no mínimo 8 caracteres"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const dbConn = await getDb();
+      if (!dbConn) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
+
+      try {
+        // Importar crypto para gerar o hash
+        const crypto = await import("crypto");
+        const passwordHash = crypto.createHash("sha256").update(input.newPassword).digest("hex");
+
+        await dbConn
+          .update(users)
+          .set({ passwordHash, updatedAt: new Date() })
+          .where(eq(users.id, ctx.user!.id));
+
+        console.log(`[User] Password updated for user ID: ${ctx.user!.id}`);
+        return { success: true };
+      } catch (error) {
+        console.error("Erro ao atualizar senha:", error);
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Erro ao atualizar senha",
+        });
+      }
+    }),
 });

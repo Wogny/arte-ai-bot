@@ -26,15 +26,18 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const updateNameMutation = trpc.user.updateName.useMutation();
+  const updatePasswordMutation = trpc.user.updatePassword.useMutation();
+
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setMessage(null);
     try {
-      // Simular atualização de perfil
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await updateNameMutation.mutateAsync({ name: formData.name });
       setMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Erro ao atualizar perfil' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Erro ao atualizar perfil' });
     } finally {
       setIsLoading(false);
     }
@@ -42,6 +45,7 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage(null);
     
     if (newPassword !== confirmPassword) {
       setMessage({ type: 'error', text: 'As senhas não coincidem' });
@@ -55,13 +59,12 @@ export default function ProfileSettings({ user }: ProfileSettingsProps) {
 
     setIsLoading(true);
     try {
-      // Simular mudança de senha
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await updatePasswordMutation.mutateAsync({ newPassword });
       setMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
       setNewPassword('');
       setConfirmPassword('');
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Erro ao alterar senha' });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Erro ao alterar senha' });
     } finally {
       setIsLoading(false);
     }
