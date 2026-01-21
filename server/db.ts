@@ -117,47 +117,72 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html, text }: SendEmailOptions) {
   console.log(`[EmailService] Tentando enviar email para: ${to}`);
   
-  // Se não houver credenciais SMTP, apenas logamos (evita quebrar o servidor)
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("[EmailService] SMTP_USER ou SMTP_PASS não configurados. Email não enviado.");
-    return { success: false, message: "Configuração de email ausente" };
-  }
+  const RESEND_API_KEY = process.env.RESEND_API_KEY;
+  
+  // Se tivermos a API Key do Resend, usamos ela (mais estável no Vercel)
+  if (RESEND_API_KEY) {
+    try {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: `${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"} <onboarding@resend.dev>`,
+          to: [to],
+          subject: subject,
+          html: html,
+          text: text || html.replace(/<[^>]*>?/gm, ""),
+        }),
+      });
 
-  try {
-    // Usando require para evitar problemas de resolução de módulo ESM/TS no Vercel
-    // O Vercel lida melhor com require em funções serverless para pacotes externos
-    const nodemailer = (await import("nodemailer")).default;
-    
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: parseInt(process.env.SMTP_PORT || "587"),
-      secure: process.env.SMTP_SECURE === "true",
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-
-    const info = await transporter.sendMail({
-      from: `"${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER}>`,
-      to,
-      subject,
-      text: text || html.replace(/<[^>]*>?/gm, ""),
-      html,
-    });
-    
-    console.log(`[EmailService] Sucesso! Email enviado: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error: any) {
-    console.error("[EmailService] FALHA CRÍTICA:", error.message);
-    
-    // Em desenvolvimento ou se falhar o módulo, não travamos o fluxo do usuário
-    if (process.env.NODE_ENV === "development" || error.code === 'ERR_MODULE_NOT_FOUND') {
-      console.log("[EmailService] Simulando sucesso para não travar a interface.");
-      return { success: true, messageId: "mock-id" };
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`[EmailService] Sucesso via Resend! ID: ${data.id}`);
+        return { success: true, messageId: data.id };
+      } else {
+        const errorData = await response.json();
+        console.error("[EmailService] Erro na API do Resend:", errorData);
+      }
+    } catch (error: any) {
+      console.error("[EmailService] Falha ao chamar API do Resend:", error.message);
     }
-    throw error;
   }
+
+  // Fallback para SMTP (Gmail) se o Resend não estiver configurado ou falhar
+  if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      const nodemailer = (await import("nodemailer")).default;
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || "smtp.gmail.com",
+        port: parseInt(process.env.SMTP_PORT || "587"),
+        secure: process.env.SMTP_SECURE === "true",
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+      });
+
+      const info = await transporter.sendMail({
+        from: `"${process.env.EMAIL_FROM_NAME || "MKT Gerenciador"}" <${process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER}>`,
+        to,
+        subject,
+        text: text || html.replace(/<[^>]*>?/gm, ""),
+        html,
+      });
+      
+      console.log(`[EmailService] Sucesso via SMTP! ID: ${info.messageId}`);
+      return { success: true, messageId: info.messageId };
+    } catch (error: any) {
+      console.error("[EmailService] Falha no SMTP:", error.message);
+    }
+  }
+
+  // Se tudo falhar em desenvolvimento, simulamos sucesso
+  if (process.env.NODE_ENV === "development") {
+    console.log("[EmailService] Dev Mode: Simulando sucesso.");
+    return { success: true, messageId: "dev-mock-id" };
+  }
+
+  return { success: false, message: "Nenhum serviço de email disponível" };
 }
 
 export function getVerificationEmailTemplate(name: string, url: string) {
